@@ -36,4 +36,70 @@ type 类型名 struct {
 }
 类型名: 标识自定义结构体的名称，在同一个包内不能重复。
 字段名：表示结构体字段名。结构体中的字段名必须唯一
+字段类型：表示结构体字段的具体类型
 */
+//可以定义一个Person的结构体
+//type Person struct {
+//	name string  // 同类型的可以写在一行
+//	city string
+//	age int
+//}
+// 语言内置的数据类型是用来描述一个值的，而结构体是用来描述一组值的。本质上是一种聚合型的数据类型
+
+// 3.结构体实例化：只有当结构体实例化时才会真正的分配内存。也就是实例化后才能使用结构体的字段。
+// 结构体本身也是一种类型，可以使用像声明内置类型一样使用var 关键字来声明结构体类型 var 结构体实例结构体类型
+//type Person struct {
+//	name, city string
+//	age int
+//}
+//
+//func main() {
+//	var p Person
+//	p.name = "娜扎"
+//	p.city = "新疆"
+//	p.age= 18
+//
+//	fmt.Printf("p=%v\n", p)
+//	fmt.Printf("p=%#v\n", p)
+//}
+
+// 3.1.匿名结构体：在定义一些临时数据结构等场景下还可以使用匿名结构体
+//func main() {
+//	var user struct{Name string; Age int}
+//
+//	user.Name = "小王子"
+//	user.Age = 3
+//
+//	fmt.Printf("user=%#v \n", user)
+//}
+
+// 3.2.创建指针类型结构体： 可以使用new关键字对结构体进行实例化，得到结构体的地址
+//func main() {
+//	var p = new(Person)
+//	fmt.Printf("type of p: %T\n", p)
+//	fmt.Printf("p= %#v\n", p)
+//}
+
+// 3.2.1.在Go语言中支持对结构体指针直接使用.来访问结构体成员
+//func main() {
+//	var p = new(Person)
+//	p.name = "小王子"
+//	p.city = "地球"
+//	p.age = 3
+//	fmt.Printf("p=%#v\n", p)
+//}
+
+// 3.2.2.取结构体的实例化地址：使用&对结构体进行取地址操作相当于对结构体进行一次new的操作
+//func main() {
+//	p := &Person{}
+//	fmt.Printf("%T\n", p)
+//	fmt.Printf("p=%#v\n", p)
+//	p.name = "温"
+//	p.city = "北京"
+//	p.age = 18
+//	fmt.Println(p)
+//	fmt.Printf("p=%#v\n", p)
+//}
+
+// 4.结构体的初始化：没有初始化的结构体，其成员变量都是对应类型的零值
+
