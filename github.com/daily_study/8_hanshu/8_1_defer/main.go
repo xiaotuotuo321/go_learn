@@ -46,18 +46,39 @@ import "fmt"
 // }
 
 // 4.defer调用引用结构体函数
+//type Users struct {
+//	name string
+//}
+//
+//func (t *Users) GetName() { // * 是传址的意思 引用Users
+//	fmt.Println(t.name)
+//}
+//
+//func main() {
+//	list := []Users{{"乔峰"}, {"慕容复"}, {"清风扬"}}
+//
+//	for _, t := range list {
+//		defer t.GetName()
+//	}
+//}
+
+// 5.在4的基础上换一种调用方式
 type Users struct {
 	name string
 }
 
-func (t *Users) GetName() { // * 是传址的意思 引用Users
+func (t *Users) GetName() {
 	fmt.Println(t.name)
 }
 
+func GetName(t Users) {
+	t.GetName()
+}
+
 func main() {
-	list := []Users{{"乔峰"}, {"慕容复"}, {"清风扬"}}
+	list := []Users{{"乔峰"}, {"慕容复"}, {"清风杨"}}
 
 	for _, t := range list {
-		defer t.GetName()
+		defer GetName(t)
 	}
 }
