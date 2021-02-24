@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // 结构体：struct
 // go语言中没有"类"的概念,也不支持"类"的继承等面向对象的概念。go语言中通过结构体的内嵌在配合接口比面向对象具有更改的扩展性和灵活性。
 
@@ -101,5 +103,102 @@ type 类型名 struct {
 //	fmt.Printf("p=%#v\n", p)
 //}
 
-// 4.结构体的初始化：没有初始化的结构体，其成员变量都是对应类型的零值
+// 4.结构体的初始化
+type person struct {
+	name string
+	city string
+	age int8
+}
 
+//func main() {
+	// 4.1.没有初始化的结构体，其成员变量都是对应类型的零值
+	//var p1 person
+	//fmt.Printf("p1=%#v", p1)
+
+	// 4.2.使用键值对初始化：使用键值对初始化结构体时，键对应结构体的字段，值对应该字段的初始值
+	//p2 := person{
+	//	name: "小王子",
+	//	city: "北京",
+	//	age: 18,
+	//}
+	//fmt.Printf("p2=%#v \n", p2)
+
+    // 4.3.也可以对结构体指针进行键值对初始化，
+	//p3 := &person{
+	//	name: "小王子",
+	//	city: "北京",
+	//	age: 18,
+	//}
+	//fmt.Printf("p3=%#v", p3)
+
+    // 4.4.当某些字段没有初始值的时候，该字段可以不写。此时没有指定初始值的字段的值就是该字段类型的零值
+	//p4 := person{
+	//	city: "北京",
+	//}
+	//fmt.Printf("p4=%#v", p4)
+
+	// 4.5.使用值的列表初始化，在初始化结构体的时候可以简写，也就是初始化的时候不写键，直接写值
+	/* 注意：
+		1.必须初始化结构体的所有字段
+		2.初始值的填充顺序必须与字段在结构体中的声明顺序一致
+		3.该方式不能和键值初始化方式混用
+	*/
+	//p5 := &person{
+	//	"沙河娜扎",
+	//	"",
+	//	18,
+	//}
+	//fmt.Printf("p5=%#v", p5)
+//}
+
+// 5.结构体内存分布：结构体占用一块连续的内存
+//type test struct{
+//	a int8
+//	b int8
+//	c int8
+//	d int8
+//}
+//
+//func main() {
+//	n := test{
+//		1, 2, 3, 4,
+//	}
+//	fmt.Printf("n.a %p \n", &n.a)
+//	fmt.Printf("n.b %p \n", &n.b)
+//	fmt.Printf("n.c %p \n", &n.c)
+//	fmt.Printf("n.d %p \n", &n.d)
+//}
+
+// 5.1.空结构体是不占用空间的
+//var v struct{}
+//
+//func main() {
+//	println(unsafe.Sizeof(v))
+//}
+
+// 6.结构体的面试题
+type student struct {
+	name string
+	age int
+}
+
+func main() {
+	m := make(map[string]*student)
+
+	stus := []student{
+		{"小王子", 18},
+		{"娜扎", 23},
+		{"大王八", 9000},
+	}
+
+	for _, stu := range stus {
+		fmt.Println(stu, &stu)
+
+		m[stu.name] = &stu
+		fmt.Println(m)
+	}
+	fmt.Println(m)
+	for k, v := range m {
+		fmt.Println(k, "=>", v.name, v.age)
+	}
+}
