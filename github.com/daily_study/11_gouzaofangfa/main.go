@@ -1,9 +1,6 @@
 package main
 
-import (
-	"encoding/json"
-	"fmt"
-)
+import "fmt"
 
 // 方法和接收者：go中的方法是一种作用于特定类型变量的函数。这种特定类型叫做接收者
 // 语法：func(接收者变量，接收者类型) 方法名(参数列表) (返回参数){ 函数体 }
@@ -171,48 +168,100 @@ import (
 // 6.结构体字段的可见性：结构体中字段大写开头表示可公开访问，小写表示私有
 
 // 7.结构体和json序列化
-type Student struct {
-	Id int
-	Gender string
-	Name string
+//type Student struct {
+//	Id int
+//	Gender string
+//	Name string
+//}
+//
+//type Class struct {
+//	Title string
+//	Students []*Student
+//}
+//
+//func main() {
+//	c := &Class{
+//		Title: "火箭101",
+//		Students: make([]*Student, 0, 30),
+//	}
+//
+//	for i:=1; i < 10; i++ {
+//		stu := &Student{
+//			Name: fmt.Sprintf("stu%02d", i),
+//			Gender: "男",
+//			Id: i,
+//		}
+//		c.Students = append(c.Students, stu)
+//	}
+//
+//	// json序列化, 结构体-->json格式的字符串
+//	data, err := json.Marshal(c)
+//	if err != nil{
+//		fmt.Println("json marshal filed")
+//		return
+//	}
+//	fmt.Printf("json:%s\n", data)
+//
+//	// 反序列化
+//	str := `{"Title":"101","Students":[{"ID":0,"Gender":"男","Name":"stu00"},{"ID":1,"Gender":"男","Name":"stu01"},{"ID":2,"Gender":"男","Name":"stu02"},{"ID":3,"Gender":"男","Name":"stu03"},{"ID":4,"Gender":"男","Name":"stu04"},{"ID":5,"Gender":"男","Name":"stu05"},{"ID":6,"Gender":"男","Name":"stu06"},{"ID":7,"Gender":"男","Name":"stu07"},{"ID":8,"Gender":"男","Name":"stu08"},{"ID":9,"Gender":"男","Name":"stu09"}]}`
+//	c1 := &Class{}
+//	err = json.Unmarshal([]byte(str), c1)
+//	if err != nil {
+//		fmt.Println("json unmarshal failed!")
+//		return
+//	}
+//	fmt.Printf("%#v\n", c1)
+//}
+
+// 8.结构体标签（tag）：tag 是结构体的元信息，可以在运行时通过反射的机制读取出来，tag在结构体中字段的后方定义。
+// `key1:"value1" key2:"value2"`
+// 结构体tag由一个或多个键值对组成。键与值之间使用冒号分隔。使用双引号括起来。同一个结构体字段可以设置对个键值对tag,不同的键值对之间使用空格分隔
+// 注意：为结构体编写tag时，必须严格遵守键值对的规则。结构体标签的解析代码的容错能力很差，一旦格式写错，编译和运行都不会提示任何的错误信息，
+// 通过反射也无法获取正确取值。不要在key和value之间添加空格
+//type Student struct {
+//	ID int `json:"id"`	// 通过tag实现json序列化该字段时的key
+//	Gender string 	// json序列化是默认使用字段名作为key
+//	name string 	// 私有不能被json包访问
+//}
+//
+//func main() {
+//	s1 := Student{
+//		1,
+//		"男",
+//		"沙河娜扎",
+//	}
+//	data, err := json.Marshal(s1)
+//	if err != nil{
+//		fmt.Println("json marshal failed!")
+//		return
+//	}
+//	fmt.Printf("json str: %s\n", data)	// json str: {"id":1,"Gender":"男"}
+//}
+
+// 9.结构体和方法补充知识点：因为slice和map这两种数据类型都包含了指向底层数据的指针，因此我们在需要复制他们时要特别注意。
+type Person struct {
+	name string
+	age int8
+	dreams []string
 }
 
-type Class struct {
-	Title string
-	Students []*Student
+func (p *Person) SetDream(dreams []string) {
+	p.dreams = dreams
+}
+
+func (p *Person) SetDream1(dreams []string){
+	p.dreams = make([]string, len(dreams))
+	copy(p.dreams, dreams)
 }
 
 func main() {
-	c := &Class{
-		Title: "火箭101",
-		Students: make([]*Student, 0, 30),
-	}
+	p1 := Person{name: "小王子", age: 18}
+	data := []string{"吃饭", "睡觉", "打豆豆"}
+	p1.SetDream1(data)
 
-	for i:=1; i < 10; i++ {
-		stu := &Student{
-			Name: fmt.Sprintf("stu%02d", i),
-			Gender: "男",
-			Id: i,
-		}
-		c.Students = append(c.Students, stu)
-	}
-
-	// json序列化, 结构体-->json格式的字符串
-	data, err := json.Marshal(c)
-	if err != nil{
-		fmt.Println("json marshal filed")
-		return
-	}
-	fmt.Printf("json:%s\n", data)
-
-	// 反序列化
-	str := `{"Title":"101","Students":[{"ID":0,"Gender":"男","Name":"stu00"},{"ID":1,"Gender":"男","Name":"stu01"},{"ID":2,"Gender":"男","Name":"stu02"},{"ID":3,"Gender":"男","Name":"stu03"},{"ID":4,"Gender":"男","Name":"stu04"},{"ID":5,"Gender":"男","Name":"stu05"},{"ID":6,"Gender":"男","Name":"stu06"},{"ID":7,"Gender":"男","Name":"stu07"},{"ID":8,"Gender":"男","Name":"stu08"},{"ID":9,"Gender":"男","Name":"stu09"}]}`
-	c1 := &Class{}
-	err = json.Unmarshal([]byte(str), c1)
-	if err != nil {
-		fmt.Println("json unmarshal failed!")
-		return
-	}
-	fmt.Printf("%#v\n", c1)
+	// 想要修改p1.dreams
+	data[1] = "不睡觉"
+	p1.dreams[1] = "不睡觉"
+	fmt.Println(data) 	// [吃饭 不睡觉 打豆豆]
+	fmt.Println(p1.dreams) 	// [吃饭 不睡觉 打豆豆]
 }
-
