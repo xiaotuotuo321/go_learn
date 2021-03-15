@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 // go中的并发学习：并发是编程里面一个非常重要的概念，go语言在语言层面天生支持并发，这也是go语言流行的一个很重要的原因
 
 // 1.并发与并行
@@ -166,15 +164,261 @@ ch6 := make(chan []int)
 
 // 4.2.channel操作：发送（send）、接收（receive）、关闭（close）三种操作
 // 发送和接收都是用 <- 符号
-func main() {
-    // 定义一个通道
-	ch := make(chan int)
-	// 发送
-	ch <- 10
-	// 接收 从一个通道中接收值
-	x := <- ch
-	fmt.Println(x)
-	// 关闭 通过调用内置的close函数来关闭通道
-	close(ch)
+//func main() {
+//    // 定义一个通道
+//	ch := make(chan int)
+//	// 发送
+//	ch <- 10
+//	// 接收 从一个通道中接收值
+//	x := <- ch
+//	fmt.Println(x)
+//	// 关闭 通过调用内置的close函数来关闭通道
+//	close(ch)
+//}
+// 关闭通道要注意的事情是，只有在通知接收方goroutine所有的数据都发送完毕的时候需要关闭通道。通道是可以被垃圾回收机制回收的，它和关闭文件是不一样的
+// 在结束操作之后关闭文件是必须要做的事情，但关闭通道不是必须的
+
+/*
+关闭通道之后有以下特点
+1. 对一个关闭的通道再发送值就会导致panic
+2. 对一个关闭的通道进行接收会一致获取值直到通道为空
+3. 对一个关闭的并且没有值得通道执行接收操作会得到对应类型的零值
+4. 关闭一个已经关闭的通道会导致panic
+*/
+
+// 4.3.无缓冲的通道：无缓冲的通道又被称为阻塞的通道。
+//func main() {
+//	ch := make(chan int)
+//	ch <- 10
+//	fmt.Println("发送成功")	// fatal error: all goroutines are asleep - deadlock!
+//}
+/*
+为什么上述的代码会报错。
+因为我们使用ch := make(chan int)创建的是无缓冲的通道，无缓冲的通道只有在有人接收值的时候才能发送值。无缓冲的通道必须有接收才能发送
+上面的代码阻塞在 ch <- 10这一行代码形成死锁
+*/
+
+//func recv(c chan int) {
+//	ret := <- c
+//	fmt.Println("接收成功", ret)
+//}
+//
+//func main() {
+//	ch := make(chan int)
+//	go recv(ch) // 启用goroutine通道接收值
+//	ch <- 10
+//	fmt.Println("发送成功")
+//}
+
+// 无缓冲通道上的发送操作会阻塞，直到另一个goroutine在该通道上执行接收操作，这时值才能发送成功，两个goroutine将继续执行。相反，如果接收操作先
+// 执行，接收方的goroutine将阻塞，直到另一个goroutine在该通道上发送一个值。
+
+// 使用无缓冲通道进行信号将导致发送和接收同步化，因此，无缓冲通道也称为同步通道
+
+// 4.4.有缓冲的通道：为解决上面的问题还有一种就是使用有缓冲区的通道，我们可以使用make函数初始化通道的时候为其指定通道的容量
+//func main() {
+//	ch := make(chan int, 1)
+//	ch <- 10
+//	fmt.Println("发送成功")
+//}
+
+// 只要通道的容量大于零，那么该通道就是有缓冲的通道，通道的容量表示通道中能存放元素的数量。我们可以通过内置的len函数获取通道内元素的数量，使用cap
+// 函数获取通道的容量。
+
+// 4.5.for range从通道循环取值：当向通道中发送完数据时，我们可以通过close函数来关闭通道。
+// 当通道被关闭时，再往该通道发送值会引发panic，从该通道取值的操作会先取完通道中的值，再然后取到的值一直都是对应类型的零值
+// channel 练习
+//func main() {
+//	ch1 := make(chan int)
+//	ch2 := make(chan int)
+//
+//	// 开启goroutine将0~10的数发送到ch1中
+//	go func() {
+//		for i := 1; i < 10; i++ {
+//			ch1 <- i
+//		}
+//		close(ch1)
+//	}()
+//	// 开启goroutine从ch1中接收的值，并将该值得平方发送到ch2中
+//	go func() {
+//		for {
+//			i, ok := <- ch1
+//			if !ok {
+//				break
+//			}
+//			ch2 <- i * i
+//		}
+//		close(ch2)
+//	}()
+//	// 在主goroutine中从ch2中接收值打印
+//	for i := range ch2{
+//		fmt.Println(i)
+//	}
+//}
+// 从上面的例子中我们看到有两种方式在接收值得时候判断该通道是否被关闭，不过我们通常使用的是for range的方式。使用for range遍历通道，当通道被关闭
+// 的时候就会退出for range
+
+// 4.6.单向通道：有的时候我们会将通道做为参数在对个任务函数间传递，很多时候我们在不同的任务函数中使用通道都会对其进行限制，比如限制通道在函数中只能
+// 发送或者接收。
+//func counter(out chan <- int){
+//	for i := 0; i < 100; i++{
+//		out <- i
+//	}
+//	close(out)
+//}
+//
+//func squarer(out chan <- int, in <- chan int){
+//	for i := range in {
+//		out <- i * i
+//	}
+//	close(out)
+//}
+//
+//func printer(in <- chan int){
+//	for i := range in {
+//		fmt.Println(i)
+//	}
+//}
+//
+//func main() {
+//	ch1 := make(chan int)
+//	ch2 := make(chan int)
+//	go counter(ch1)
+//	go squarer(ch2, ch1)
+//	printer(ch2)
+//}
+
+/*
+其中：
+	1.chan <- int是一个只写单向通道（只能对其写入int类型值），可以对其执行发送操作但是不能执行接收操作
+	2.<- chan int是一个只读单向通道（只能从其读取int类型值），可以对其执行接收操作但是不能执行发送操作
+在函数传参及任何赋值操作中可以将双向通道转换为单向通道，但是反过来是不可以的
+*/
+
+/*
+channel 异常情况总结
+channel		nil		非空			空的			满了			没满
+接收			阻塞		接收值		阻塞			接收值		接收值
+发送			阻塞		接收值		发送值		阻塞			发送值
+关闭			panic	关闭成功		关闭成功		关闭成功		关闭成功
+					读完数据后	返回零值		读完数据后	读完数据后
+					返回零值					返回零值		返回零值
+关闭已经关闭的channel也会引发panic
+*/
+
+// 5.worker pool（goroutine 池）我们在工作中通常会使用可以指定启动的goroutine数量- work pool模式，通过控制goroutine的数量，防止goroutine泄露和暴涨
+//func worker(id int, jobs <- chan int, results chan <- int) {
+//	for j := range jobs {
+//		fmt.Printf("worker: %d start job: %d\n", id, j)
+//		time.Sleep(time.Second)
+//		fmt.Printf("worker: %d end job: %d\n", id, j)
+//		results <- j * 2
+//	}
+//}
+//
+//func main() {
+//	jobs := make(chan int, 100)
+//	results := make(chan int, 100)
+//
+//	// 开启3个goroutine
+//	for w := 1; w <= 3; w++{
+//		go worker(w, jobs, results)
+//	}
+//	// 5个任务
+//	for j := 1; j <= 5; j++{
+//		jobs <- j
+//	}
+//	close(jobs)
+//	// 输出结果
+//	for a:= 1; a <= 5; a++{
+//		<- results
+//	}
+//}
+
+// 6.select多路复用：在某些场景下我们需要同时从多个通道接收数据，通道在收数据时，如果没有发生阻塞
+//for {
+//	// 尝试从ch1接收数值
+//	data, ok := <- ch1
+//	// 尝试从ch2接收值
+//	data, ok := <- ch2
+//}
+// 这种方式虽然可以实现从多个通道接收值的需求，但是运行性能会差很多，为了应付这种场景，go内置了select关键字，可以同时相应多个通道的操作
+// select的使用类似于switch语句，他有一系列case分支和一个默认的额分支。每个case会对应一个通道的通信（接收或发送）过程。select会一致等待，直到
+// 某个case的通信操作完成时，就会执行case分支对应的语句
+/*
+select {
+	case <- ch1:
+		...
+	case data := <- ch2:
+		...
+	case ch3 <- data:
+		...
+	default:
+		默认操作
 }
+*/
+//func main() {
+//	ch := make(chan int, 1)
+//	for i := 0; i < 10; i++ {
+//		select {
+//		case x := <- ch:
+//			fmt.Println(x)
+//			case ch <- i:
+//		}
+//	}
+//}
+/*
+使用select语句能提高代码的刻度性
+- 可以处理一个或多个channel的发送/接收操作
+- 如果多个case同时满足，select会随机选择一个
+- 对于没有case的select{}会一直等待，可用于阻塞main的函数
+*/
+
+// 7.并发安全和锁：有时候在go代码中可能会存在多个goroutine同时操作一个资源（临界区）,这种情况会发生竟态问题（数据竟态）。'
+//var x int64
+//var wg sync.WaitGroup
+//
+//func add() {
+//	for i := 1; i < 5000; i++ {
+//		x += 1
+//	}
+//	wg.Done()
+//}
+//func main() {
+//	wg.Add(2)
+//	go add()
+//	go add()
+//	wg.Wait()
+//	fmt.Println(x)
+//}
+
+// 上面的代码中我们开启了两个goroutine去累加变量x的值，这两个goroutine在访问和修改x变量的时候就会存在数据竞争，导致最后的结果与期待的不符
+
+// 7.1.互斥锁：互斥锁是一种常见的共享资源的访问方式，他能保证在同时只有一个goroutine可以访问共享资源。go语言中使用sync包的Mutex类型来实现
+// 互斥锁
+//var x int64
+//var wg sync.WaitGroup
+//var lock sync.Mutex
+//
+//func add() {
+//	for i := 1; i < 5000; i++ {
+//		lock.Lock()	// 加锁
+//		x += 1
+//		lock.Unlock() // 解锁
+//	}
+//	wg.Done()
+//}
+//func main() {
+//	wg.Add(2)
+//	go add()
+//	go add()
+//	wg.Wait()
+//	fmt.Println(x)
+//}
+
+// 使用互斥锁能保证同一个时间有且只有一个goroutine进入临界区，其他的goroutine则在等待锁；当互斥锁释放后，等待的goroutine才可以获取锁进入临界区
+// 多个goroutine同时等待一个锁时，唤醒的策略是随机的。
+
+// 7.2.读写互斥锁：互斥锁是完全互斥的，但是有很多实际的情况下是读多写少，当我们并发的去读取一个资源不涉及资源修改的时候是没有必要加锁的，这种场景下，
+// 使用读写锁是更好的选择。读写锁在go中使用sync包中的RWMutex类型。
 
