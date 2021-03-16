@@ -1,5 +1,10 @@
 package main
 
+import (
+	"fmt"
+	"sync"
+)
+
 // go中的并发学习：并发是编程里面一个非常重要的概念，go语言在语言层面天生支持并发，这也是go语言流行的一个很重要的原因
 
 // 1.并发与并行
@@ -421,4 +426,68 @@ select {
 
 // 7.2.读写互斥锁：互斥锁是完全互斥的，但是有很多实际的情况下是读多写少，当我们并发的去读取一个资源不涉及资源修改的时候是没有必要加锁的，这种场景下，
 // 使用读写锁是更好的选择。读写锁在go中使用sync包中的RWMutex类型。
+//var (
+//	x int64
+//	wg sync.WaitGroup
+//	lock sync.Mutex
+//	rwlock sync.RWMutex
+//)
+//
+//func writer() {
+//	lock.Lock()	// 加互斥锁
+//	//rwlock.Lock()	// 加写锁
+//	time.Sleep(10 * time.Millisecond)	// 假设读操作耗时10秒
+//	//rwlock.Unlock()	// 解写锁
+//	lock.Unlock()	// 解互斥锁
+//	wg.Done()
+//}
+//
+//func read() {
+//	lock.Lock()	// 加互斥锁
+//	//rwlock.Lock()	// 加读锁
+//	time.Sleep(time.Millisecond)	// 假设操作时间为1毫秒
+//	//rwlock.Unlock()	// 解读锁
+//	lock.Unlock()	// 解互斥锁
+//	wg.Done()
+//}
+//
+//func main() {
+//	start := time.Now()
+//	for i := 0; i < 10; i++{
+//		wg.Add(1)
+//		go writer()
+//	}
+//	for i := 0; i < 100000; i++ {
+//		wg.Add(1)
+//		go read()
+//	}
+//	wg.Wait()
+//	end := time.Now()
+//	fmt.Println(end.Sub(start))
+//}
+// 需要注意的是读写锁非常适合读多写少的场景，如果读和写的操作区别不大，读写锁的优势就发挥不出来了
 
+// 7.3.sync.WaitGroup,在代码中生硬的使用time.Sleep肯定是不合适的，go语言中可以使用 sync.WaitGroup来实现并发任务的同步
+/*
+方法名						功能
+Add(delta int)				计数器+delta
+Done()						计数器-1
+Wait()						阻塞到计数器变为0
+*/
+// sync.WaitGroup内部维护着一个计数器，计数器的值可以增加和减少。当启动了N个并发任务时，就将计数器值增加N。每个任务完成时通过调用Done()方法将
+// 计数器减1，通过调用Wait()来等待并发任务执行完，当计数器值为0时，表示所有的并发任务已经完成
+
+var wg sync.WaitGroup
+
+func hello() {
+	defer wg.Done()
+	fmt.Println("Hello Goroutine")
+}
+
+func main() {
+	wg.Add(1)
+	go hello()	// 启动另外一个goroutine去执行hello函数
+	fmt.Println("main goroutine done!")
+	wg.Wait()
+}
+// sync.WaitGroup是一个结构体，传递的时候要传指针
