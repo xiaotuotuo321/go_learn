@@ -2,8 +2,9 @@ package main
 
 import (
 	"fmt"
-	"strconv"
 	"sync"
+	"sync/atomic"
+	"time"
 )
 
 // go中的并发学习：并发是编程里面一个非常重要的概念，go语言在语言层面天生支持并发，这也是go语言流行的一个很重要的原因
@@ -604,19 +605,103 @@ Wait()						阻塞到计数器变为0
 // 像这种场景下就需要为map加锁来保证并发的安全性了，go语言的sync包中提供了一个开箱即用的并发安全版map-sync.Map。开箱即用表示不用像内置的map一样使用
 // make函数初始化就能直接使用。同时sync.map内置了诸如Store、Load、LoadOrStore、Delete、Range等操作方法。
 
-var m = sync.Map{}
+//var m = sync.Map{}
+//
+//func main() {
+//	wg := sync.WaitGroup{}
+//	for i := 0; i < 20; i++{
+//		wg.Add(1)
+//		go func(n int) {
+//			key := strconv.Itoa(n)
+//			m.Store(key, n)
+//			value, _ := m.Load(key)
+//			fmt.Printf("k=%v, v=%v\n", key, value)
+//			wg.Done()
+//		}(i)
+//	}
+//	wg.Wait()
+//}
+
+// 8.原子操作：代码中加锁操作因为涉及内核态的上下文切换会比较耗时、代价比较高。针对基本的数据类型我们还可以使用原子操作来保证并发安全，因为原子操作
+// 是go语言提供的方法他在用户态就可以完成，因此性能比加锁操作更好。go语言中原子操作由内部的标准库sync/atomic提供
+// 比较互斥锁和原子操作的性能
+
+type Counter interface {
+	Inc()
+	Load() int64
+}
+// 普通版
+type CommonCounter struct {
+	counter int64
+}
+
+func (c CommonCounter) Inc(){
+	c.counter++
+}
+
+func (c CommonCounter) Load() int64{
+	return c.counter
+}
+
+// 互斥锁版本
+type MutexCounter struct {
+	counter int64
+	lock sync.Mutex
+}
+
+func (m *MutexCounter) Inc() {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	m.counter++
+}
+
+func (m *MutexCounter) Load() int64 {
+	m.lock.Lock()
+	defer m.lock.Unlock()
+	return m.counter
+}
+
+// 原子操作板
+type AtomicCounter struct {
+	counter int64
+}
+
+func (a *AtomicCounter) Inc() {
+	atomic.AddInt64(&a.counter, 1)
+}
+
+func (a *AtomicCounter) Load() int64 {
+	return atomic.LoadInt64(&a.counter)
+}
+
+func test(c Counter){
+	var wg sync.WaitGroup
+	start := time.Now()
+	for i := 0; i < 1000; i++{
+		wg.Add(1)
+		go func() {
+			c.Inc()
+			wg.Done()
+		}()
+		wg.Wait()
+		end := time.Now()
+		fmt.Println(c.Load(), end.Sub(start))
+	}
+}
 
 func main() {
-	wg := sync.WaitGroup{}
-	for i := 0; i < 20; i++{
-		wg.Add(1)
-		go func(n int) {
-			key := strconv.Itoa(n)
-			m.Store(key, n)
-			value, _ := m.Load(key)
-			fmt.Printf("k=%v, v=%v\n", key, value)
-			wg.Done()
-		}(i)
-	}
-	wg.Wait()
+	c1 := CommonCounter{}	// 非并发安全
+	test(c1)
+
+	c2 := MutexCounter{}	// 使用互斥锁实现并发安全
+	test(&c2)
+
+	c3 := AtomicCounter{}	// 并发安全且比互斥锁效率更高
+	test(&c3)
 }
+
+// atomic包提供了底层的原子级内存操作，对于同步算法的实现很有用。这些函数必须谨慎地保证正确使用。除了某些特殊的底层应用，使用通道或着sync包的函数
+// /类型实现同步更好。
+
+
+// 后面还需要多了解
