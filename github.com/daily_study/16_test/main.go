@@ -1,6 +1,10 @@
 package main
 
-import "testing"
+import (
+	"fmt"
+	"os"
+	"testing"
+)
 
 // go语言-单元测试
 
@@ -172,4 +176,36 @@ $ go test -bench=.
 	还可以通过在测试命令后添加-cpu参数如go test -bench=. -cpu 1来指定使用的CPU数量。
 */
 
+// 11.setup 和 teardown：测试程序时需要在测试前进行额外的设置（setup）或在测试之后进行拆卸（teardown）
+// 11.1.testMain：通过*_test.go文件中定义TestMain函数来可以在测试之前进行额外的设置(setup)或在测试之后进行拆卸(teardown)操作
+// 如果测试文件包含函数：func TestMain(m *testing.M)那么生成的测试会先调用TestMain(m)，然后再运行具体测试。TestMain运行在主goroutine中
+// 可以在调用m.Run前后做任何设置(setup)和拆卸(teardown)。退出测试的时候应该使用m.Run的返回值作为参数调用os.Exit.
+
+func TestMain(m *testing.M){
+	fmt.Println("write setup code here ...")// 测试之前的做一些设置
+	// 如果 TestMain 使用了flags, 这里应该加上flag.Parse()
+	retCode := m.Run()  // 执行测试
+	fmt.Println("write teardown code here...") // 测试之后做一些拆卸工作
+	os.Exit(retCode)	// 退出测试
+}
+// 需要注意的是：在调用TestMain时，flag.Parse并没有被调用，所以如果TestMan依赖于command-line标志（包括testing包的标记），则应该显示的调用flag.Parse
+
+// 11.2.子测试的setup 与 Teardown: 有时候我们需要为每个测试集设置setup与Teardown，也有可能要为每个子测试设置Setup与Teardown.
+
+// 12.示例函数：
+// 12.1.示例函数的格式：被go test特殊对待的第三种函数就是示例函数，他们的函数名以example为前缀，他们既没有参数也没有返回值。
+/*
+func ExampleName() {
+	// ....
+}
+*/
+
+// 12.2.示例函数示例
+/*
+为代码编写示例代码有如下三个用处：
+	1.示例函数能够作为文档直接使用，例如基于web的godoc中能把示例函数与对应的函数或包相关联
+	2.示例函数只要包含了 // Output: 也可以通过go test 运行的可执行测试
+	3.示例函数提供了可以直接运行的示例代码，可以直接在golang.org的godoc文档服务器上使用GoPlayground 运行示例代码，下图为strings.ToUpper
+ 	  函数在Playground的示例函数效果。
+*/
 
