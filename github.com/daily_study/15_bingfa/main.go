@@ -1,18 +1,11 @@
 package main
 
-import (
-	"fmt"
-	"sync"
-	"sync/atomic"
-	"time"
-)
-
 // go中的并发学习：并发是编程里面一个非常重要的概念，go语言在语言层面天生支持并发，这也是go语言流行的一个很重要的原因
 
 // 1.并发与并行
 /*
-并发：同一时间段内执行对个任务
-并行：同一时刻执行对个任务
+并发：同一时间段内执行多个任务
+并行：同一时刻执行多个任务
 go语言中通过goroutine实现。goroutine类似于线程，属于用户态的线程，我们可以根据需要创建成千上万个goroutine并发工作。goroutine是go语言的运行
 时（runtime）调度完成，而线程是由操作系统调度完成。go语言还提供channel在多个goroutine间进行通信，goroutine和channel是go语言秉承CSP并发模式
 的重要实现
@@ -21,7 +14,7 @@ go语言中通过goroutine实现。goroutine类似于线程，属于用户态的
 // 2.goroutine：在Java/c++中我们在实现并发编程时，我们通常需要自己维护一个线程池，并且需要自己去包装一个又一个任务，同时需要自己去调度线程执行
 // 任务并维护上下文的切换。goroutine实现了一种机制，程序员只需要定义很多个任务，让系统去帮忙我们把这些任务分配到CPU上实现并发
 /*
-gotoutine 的概念类似于线程，但goroutine是由go的运行时调度和管理的。go程序会智能地将goroutine中的任务合理地分配给每个CPU。go语言之所以被称为
+goroutine 的概念类似于线程，但goroutine是由go的运行时调度和管理的。go程序会智能地将goroutine中的任务合理地分配给每个CPU。go语言之所以被称为
 现代化的编程语言，就是因为他在语言层面已经内置了调度和上下文切换的机制。
 
 在go语言中不需要去自己写进程、线程、协程，只需要写好goroutine。当需要让某个任务并发执行的时候，只需要把这个任务包装成一个函数，开启一个goroutine
@@ -69,18 +62,18 @@ gotoutine 的概念类似于线程，但goroutine是由go的运行时调度和�
 /*
 G:就是这个goroutine，里面除了存放本goroutine信息外，还有与所在P的绑定等信息
 P：管理着一组goroutine队列，P里面会存储当前goroutine运行的上下文环境（函数指针、堆栈地址及地址边界），P会对自己管理的goroutine队列做一些调度
-（比如把占用CPU较长的goroutine暂停、运行后续的goroutine等）当自己的队列消费完了就去全局队列里取，如果全局队列里也消费完了回去其他P的队列抢任务
+（比如把占用CPU较长的goroutine暂停、运行后续的goroutine等）当自己的队列消费完了就去全局队列里取，如果全局队列里也消费完了会去其他P的队列抢任务
 M：machine是go运行时对操作系统内核线程的虚拟，M与内核线程一般是一一映射的关系，一个goroutine最终是要放在M上执行的
 
 P与M一般也是一一对应的关系。他们的关系是：P管理着一组G挂载在M上运行。当一个G长久阻塞在一个M上时，runtime会新建一个M，阻塞G所在的P会把其他的G挂载
 在新建的M上。当旧的G阻塞完成或者认为其已经死掉时，回收旧的M。
 
-P的个数是通过runtime.GOMAXPROCES设定（256）go1.5版本之后默认为物理线程数，在并发量大的时候会增加一些P和M，但不会太对，切换太频繁的话，得不偿失
+P的个数是通过runtime.GOMAXPROCES设定（256）go1.5版本之后默认为物理线程数，在并发量大的时候会增加一些P和M，但不会太多，切换太频繁的话，得不偿失
 
 单从线程调度讲，go语言相比其他语言的优势在于OS线程是由OS内核来调度的，goroutine则是由go运行时自己的调度器调度的，这个调度器使用的是一个称为m:n
 调度的技术（复用/调度m个goroutine到n个OS线程）。其一大特点是goroutine的调度是在用户态下完成的，不涉及内核态与用户态之间的频繁切换，包括内存的
 分配与释放，都是在用户态维护着一块大的内存池，不直接调用系统的malloc函数（除非内存池需要改变），成本比调度OS线程低很多。另一方面充分利用了多核的
-硬件资源，近似的把若干个goroutine均分在物理线程上，再加上goroutine的超轻量
+硬件资源，近似的把若干个goroutine均分在物理线程上，再加上goroutine的超轻量，保证了go调度方面的性能。
 */
 
 // 3.2.GOMAXPROCES
@@ -188,7 +181,7 @@ ch6 := make(chan []int)
 /*
 关闭通道之后有以下特点
 1. 对一个关闭的通道再发送值就会导致panic
-2. 对一个关闭的通道进行接收会一致获取值直到通道为空
+2. 对一个关闭的通道进行接收会一直获取值直到通道为空
 3. 对一个关闭的并且没有值得通道执行接收操作会得到对应类型的零值
 4. 关闭一个已经关闭的通道会导致panic
 */
@@ -239,7 +232,7 @@ ch6 := make(chan []int)
 //	ch1 := make(chan int)
 //	ch2 := make(chan int)
 //
-//	// 开启goroutine将0~10的数发送到ch1中
+//	// 开启goroutine将1~10的数发送到ch1中
 //	go func() {
 //		for i := 1; i < 10; i++ {
 //			ch1 <- i
@@ -265,7 +258,7 @@ ch6 := make(chan []int)
 // 从上面的例子中我们看到有两种方式在接收值得时候判断该通道是否被关闭，不过我们通常使用的是for range的方式。使用for range遍历通道，当通道被关闭
 // 的时候就会退出for range
 
-// 4.6.单向通道：有的时候我们会将通道做为参数在对个任务函数间传递，很多时候我们在不同的任务函数中使用通道都会对其进行限制，比如限制通道在函数中只能
+// 4.6.单向通道：有的时候我们会将通道做为参数在多个任务函数间传递，很多时候我们在不同的任务函数中使用通道都会对其进行限制，比如限制通道在函数中只能
 // 发送或者接收。
 //func counter(out chan <- int){
 //	for i := 0; i < 100; i++{
@@ -367,10 +360,12 @@ select {
 //func main() {
 //	ch := make(chan int, 1)
 //	for i := 0; i < 10; i++ {
+//		fmt.Printf("i的值为：%d\n", i)
+//		// chan有值得话才能给x赋值，没有值得话只能先给chan赋值
 //		select {
 //		case x := <- ch:
 //			fmt.Println(x)
-//			case ch <- i:
+//		case ch <- i:
 //		}
 //	}
 //}
@@ -496,7 +491,7 @@ Wait()						阻塞到计数器变为0
 
 // 7.4. sync.Once 这是一个进阶知识点
 // 在编程的很多场景下我们需要确保某些操作在高并发的场景下只执行一次，比如只加载一次配置文件、只关闭一次通道等。
-// go预言者中sync包中提供了一个针对只执行一次场景的解决方案- sync.Once 它只有一个Do方法
+// go语言中sync包中提供了一个针对只执行一次场景的解决方案- sync.Once 它只有一个Do方法
 // func (o *Once) Do(f func()) {} 如果要执行的函数f 需要传递参数就需要搭配闭包来使用
 
 // 加载配置文件示例
@@ -526,7 +521,7 @@ Wait()						阻塞到计数器变为0
 //}
 
 // 7.4.2.
-// 对个goroutine并发调用Icon函数时不是并发安全的，现代的编译器和CPU可能会在保证每个goroutine都满足串行一致的基础上自由地重排访问内存的顺序。
+// 多个goroutine并发调用Icon函数时不是并发安全的，现代的编译器和CPU可能会在保证每个goroutine都满足串行一致的基础上自由地重排访问内存的顺序。
 // loadIcons函数可能会被重排为以下结果
 
 //func loadIcons() {
@@ -600,7 +595,7 @@ Wait()						阻塞到计数器变为0
 //	wg.Wait()
 //}
 
-// 上面的代码开启少量几个goroutine的时候可能没有什么问题，当并发对了之后执行上面的代码就会出现fatal error: concurrent map writes 错误
+// 上面的代码开启少量几个goroutine的时候可能没有什么问题，当并发多了之后执行上面的代码就会出现fatal error: concurrent map writes 错误
 
 // 像这种场景下就需要为map加锁来保证并发的安全性了，go语言的sync包中提供了一个开箱即用的并发安全版map-sync.Map。开箱即用表示不用像内置的map一样使用
 // make函数初始化就能直接使用。同时sync.map内置了诸如Store、Load、LoadOrStore、Delete、Range等操作方法。
@@ -626,82 +621,101 @@ Wait()						阻塞到计数器变为0
 // 是go语言提供的方法他在用户态就可以完成，因此性能比加锁操作更好。go语言中原子操作由内部的标准库sync/atomic提供
 // 比较互斥锁和原子操作的性能
 
-type Counter interface {
-	Inc()
-	Load() int64
-}
-// 普通版
-type CommonCounter struct {
-	counter int64
-}
-
-func (c CommonCounter) Inc(){
-	c.counter++
-}
-
-func (c CommonCounter) Load() int64{
-	return c.counter
-}
-
-// 互斥锁版本
-type MutexCounter struct {
-	counter int64
-	lock sync.Mutex
-}
-
-func (m *MutexCounter) Inc() {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	m.counter++
-}
-
-func (m *MutexCounter) Load() int64 {
-	m.lock.Lock()
-	defer m.lock.Unlock()
-	return m.counter
-}
-
-// 原子操作板
-type AtomicCounter struct {
-	counter int64
-}
-
-func (a *AtomicCounter) Inc() {
-	atomic.AddInt64(&a.counter, 1)
-}
-
-func (a *AtomicCounter) Load() int64 {
-	return atomic.LoadInt64(&a.counter)
-}
-
-func test(c Counter){
-	var wg sync.WaitGroup
-	start := time.Now()
-	for i := 0; i < 1000; i++{
-		wg.Add(1)
-		go func() {
-			c.Inc()
-			wg.Done()
-		}()
-		wg.Wait()
-		end := time.Now()
-		fmt.Println(c.Load(), end.Sub(start))
-	}
-}
-
-func main() {
-	c1 := CommonCounter{}	// 非并发安全
-	test(c1)
-
-	c2 := MutexCounter{}	// 使用互斥锁实现并发安全
-	test(&c2)
-
-	c3 := AtomicCounter{}	// 并发安全且比互斥锁效率更高
-	test(&c3)
-}
+//type Counter interface {
+//	Inc()
+//	Load() int64
+//}
+//// 普通版
+//type CommonCounter struct {
+//	counter int64
+//}
+//
+//func (c CommonCounter) Inc(){
+//	c.counter++
+//}
+//
+//func (c CommonCounter) Load() int64{
+//	return c.counter
+//}
+//
+//// 互斥锁版本
+//type MutexCounter struct {
+//	counter int64
+//	lock sync.Mutex
+//}
+//
+//func (m *MutexCounter) Inc() {
+//	m.lock.Lock()
+//	defer m.lock.Unlock()
+//	m.counter++
+//}
+//
+//func (m *MutexCounter) Load() int64 {
+//	m.lock.Lock()
+//	defer m.lock.Unlock()
+//	return m.counter
+//}
+//
+//// 原子操作版
+//type AtomicCounter struct {
+//	counter int64
+//}
+//
+//func (a *AtomicCounter) Inc() {
+//	atomic.AddInt64(&a.counter, 1)
+//}
+//
+//func (a *AtomicCounter) Load() int64 {
+//	return atomic.LoadInt64(&a.counter)
+//}
+//
+//func test(c Counter){
+//	var wg sync.WaitGroup
+//	start := time.Now()
+//	for i := 0; i < 1000; i++{
+//		wg.Add(1)
+//		go func() {
+//			c.Inc()
+//			wg.Done()
+//		}()
+//		wg.Wait()
+//		end := time.Now()
+//		fmt.Println(c.Load(), end.Sub(start))
+//	}
+//}
+//
+//func main() {
+//	c1 := CommonCounter{}	// 非并发安全
+//	test(c1)
+//
+//	c2 := MutexCounter{}	// 使用互斥锁实现并发安全
+//	test(&c2)
+//
+//	c3 := AtomicCounter{}	// 并发安全且比互斥锁效率更高
+//	test(&c3)
+//}
 
 // atomic包提供了底层的原子级内存操作，对于同步算法的实现很有用。这些函数必须谨慎地保证正确使用。除了某些特殊的底层应用，使用通道或着sync包的函数
-// /类型实现同步更好。
+// 类型实现同步更好。
 
 
 // 后面还需要多了解
+
+/*
+并发总结：
+1. go中的goroutine 是运行时调度，把要执行的方法包装成一个方法，直接用goroutine启动。
+2. gmp: goland中的调度器模型
+	1.g: 就是goroutine，其中包含了绑定p的信息
+	2.m: 就是machine，对应的是运行对OS内核的虚拟，m与内核线程是一一对应的关系，一个goroutine最终是要放在m上运行的
+	3.p: 管理着一组goroutine，记录着当前goroutine运行的上下文环境（函数指针，地址边界，堆栈内存），当一个goroutine耗时较长时，p会先把这个goroutine
+		 暂停，运行后面的goroutine，当自己的队列中的goroutine消费完之后回去全局队列中取goroutine，如果全局队列中也消耗完了之后，回去抢其他队列的goroutine
+3. 一个P和M也是一一对应的关系，当P中的goroutine阻塞时间太长的时候，P会组织其他的goroutine放在一个新的M上运行
+4. go的goroutine的调度是在用户态完成的，不涉及内核态。在调度器的实现上是用了一种m:n的调度方式（复用/调度m个goroutine到n个OS线程上运行），其中
+   goroutine的调度是在用户态下完成的，包括内存的分配与释放，是在用户态下维护着一块大的内存。不涉及用户态和内核态的频繁切换。另一方面采用，m:n的
+   技术，能充分利用计算机多核的优势。
+5. chan 利用通信共享内存的方式进行通信。
+	1. 使用上分为：发送，接收和关闭
+	2. 通道的类型分为：有缓冲和无缓冲的
+		1. 无缓冲类型：在声明chan时，没有规定chan的容量，必须有接收时才能发送，否则会阻塞在消息的传递。 如果先接收，会阻塞在接收位置
+		2. 有缓冲类型：在声明chan时，给定了chan的容量，当chan满了之后，必须从中取出响应的消息，才能继续接收消息。
+*/

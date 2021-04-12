@@ -1,9 +1,6 @@
 package main
 
-import (
-	"fmt"
-	"sort"
-)
+import "fmt"
 
 // 本文介绍切片：切片是一个拥有相同类型元素的可变长度的序列。他是基于数组类型做的一层封装。灵活且支持自动扩容。
 
@@ -77,9 +74,25 @@ import (
 // }
 
 // 练习题2：请使用内置的sort包对数组var a = [...]int{3, 7, 8, 9, 1}进行排序（附加题，自行查资料解答）。
-func main() {
-	var a = []int{3, 7, 8, 9, 1}
-	sort.Ints(a)
+//func main() {
+//	var a = []int{3, 7, 8, 9, 1}
+//	sort.Ints(a)
+//
+//	fmt.Println(a)
+//}
 
-	fmt.Println(a)
+func main() {
+	a := make([]int, 0, 9)
+	for i := 1; i < 20; i++{
+		a = append(a, i)
+	}
+	fmt.Println(a, len(a), cap(a))
 }
+
+/*
+切片总结：
+1.切片是相同元素可变长的序列，支持自动扩容
+2.切片是引用类型，不能直接比较，只能和nil比较
+3.切片的定义（声明，声明并初始化）
+4.切片表达式，从字符串或数组中"切出来"，通过make构造
+*/
