@@ -104,11 +104,11 @@ type 类型名 struct {
 //}
 
 // 4.结构体的初始化
-type person struct {
-	name string
-	city string
-	age int8
-}
+//type person struct {
+//	name string
+//	city string
+//	age int8
+//}
 
 //func main() {
 	// 4.1.没有初始化的结构体，其成员变量都是对应类型的零值
@@ -197,7 +197,9 @@ func main() {
 		m[stu.name] = &stu
 		fmt.Println(m)
 	}
-	fmt.Println(m)
+	fmt.Println(m, "--------")
+
+
 	for k, v := range m {
 		fmt.Println(k, "=>", v.name, v.age)
 	}

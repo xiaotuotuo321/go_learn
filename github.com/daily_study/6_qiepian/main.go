@@ -1,7 +1,5 @@
 package main
 
-import "fmt"
-
 // 本文介绍切片：切片是一个拥有相同类型元素的可变长度的序列。他是基于数组类型做的一层封装。灵活且支持自动扩容。
 
 // 1.切片的定义
@@ -36,13 +34,13 @@ import "fmt"
 // }
 
 // 1.3.2.越界问题
-// func main() {
-// 	a := [...]int{1, 2, 3, 4, 5}
-// 	s := a[1:3]
-// 	fmt.Printf("s:%v len(s):%v cap(s):%v \n", s, len(s), cap(s))
-// 	s2 := s[3:4] // 索引的上限是cap(s)而不是len(s)
-// 	fmt.Printf("s2:%v len(s2):%v cap(s2):%v \n", s2, len(s2), cap(s2))
-// }
+//func main() {
+//	a := [...]int{1, 2, 3, 4, 5}
+//	s := a[1:3]
+//	fmt.Printf("s:%v len(s):%v cap(s):%v \n", s, len(s), cap(s))
+//	s2 := s[3:4] // 索引的上限是cap(s)而不是len(s)
+//	fmt.Printf("s2:%v len(s2):%v cap(s2):%v \n", s2, len(s2), cap(s2))
+//}
 
 // 1.3.3.完成的切片表达式 a[low : high : max] 条件：0 <= low <= high <= max <= cap(a)
 // func main() {
@@ -62,16 +60,16 @@ import "fmt"
 // 1.3.5.检查切片是否为空，只能使用len(s) == 0来判断，而不是应该使用s == nil 来判断
 
 // 练习题1：输出下面的代码
-// func main() {
-// 	var a = make([]string, 5, 10)
-// 	fmt.Println(a)
-// 	fmt.Println(len(a))
-// 	for i := 0; i < 10; i++ {
-// 		a = append(a, fmt.Sprintf("%v", i))
-// 		fmt.Println(a)
-// 	}
-// 	fmt.Println(a) //[     0 1 2 3 4 5 6 7 8 9]
-// }
+//func main() {
+//	var a = make([]string, 5, 10)
+//	fmt.Println(a)
+//	fmt.Println(len(a))
+//	for i := 0; i < 10; i++ {
+//		a = append(a, fmt.Sprintf("%v", i))
+//		fmt.Println(a)
+//	}
+//	fmt.Println(a) //[     0 1 2 3 4 5 6 7 8 9]
+//}
 
 // 练习题2：请使用内置的sort包对数组var a = [...]int{3, 7, 8, 9, 1}进行排序（附加题，自行查资料解答）。
 //func main() {
@@ -81,13 +79,13 @@ import "fmt"
 //	fmt.Println(a)
 //}
 
-func main() {
-	a := make([]int, 0, 9)
-	for i := 1; i < 20; i++{
-		a = append(a, i)
-	}
-	fmt.Println(a, len(a), cap(a))
-}
+//func main() {
+//	a := make([]int, 0, 9)
+//	for i := 1; i < 20; i++{
+//		a = append(a, i)
+//	}
+//	fmt.Println(a, len(a), cap(a))
+//}
 
 /*
 切片总结：
@@ -95,4 +93,5 @@ func main() {
 2.切片是引用类型，不能直接比较，只能和nil比较
 3.切片的定义（声明，声明并初始化）
 4.切片表达式，从字符串或数组中"切出来"，通过make构造
+5.切片的本质是：对底层数组的封装，包含三个信息：底层数组的指针，切片的长度和切片的容量
 */

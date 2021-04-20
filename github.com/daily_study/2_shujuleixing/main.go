@@ -1,68 +1,66 @@
 package main
 
-import "fmt"
-
 // "math"
 
 // 1.数字 数字字面量语法
-// func main() {
-// 	// 十进制
-// 	var a int = 10
-// 	fmt.Printf("%d \n", a)
-// 	fmt.Printf("%b \n", a)
-
-// 	// 八进制 以0开头
-// 	var b = 077
-// 	fmt.Printf("%o \n", b)
-
-// 	// 十六进制 以0x开头
-// 	var c int = 0xff
-// 	fmt.Printf("%x \n", c)
-// 	fmt.Printf("%X \n", c)
-// }
+//func main() {
+//	// 十进制
+//	var a int = 10
+//	fmt.Printf("%d \n", a)
+//	fmt.Printf("%b \n", a)
+//
+//	// 八进制 以0开头
+//	var b = 077
+//	fmt.Printf("%o \n", b)
+//
+//	// 十六进制 以0x开头
+//	var c int = 0xff
+//	fmt.Printf("%x \n", c)
+//	fmt.Printf("%X \n", c)
+//	fmt.Printf("%d \n", c)
+//}
 
 // 2.浮点型
+//func main() {
+//	fmt.Printf("%f \n", math.Pi)
+//	fmt.Printf("%.2f \n", math.Pi)
+//}
 
-// func main() {
-// 	fmt.Printf("%f \n", math.Pi)
-// 	fmt.Printf("%.2f \n", math.Pi)
-// }
-
-// 3.复数: 复数有实部和虚部，complex64的实部和虚部为32位，complex128的实部和虚部为64位。
-// var c1 complex64
-// var c2 complex128
-
-// func main() {
-
-// 	c1 = 2 + 3i
-// 	c2 = 5 - 4i
-
-// 	fmt.Println(c1)
-// 	fmt.Println(c2)
-// }
+//3.复数: 复数有实部和虚部，complex64的实部和虚部为32位，complex128的实部和虚部为64位。
+//var c1 complex64
+//var c2 complex128
+//
+//func main() {
+//
+//	c1 = 2 + 3i
+//	c2 = 5 - 4i
+//
+//	fmt.Println(c1)
+//	fmt.Println(c2)
+//}
 
 // 4.布尔值，默认为false；不能将整型转化为布尔型；布尔型无法参加数值运算，也无法与其他类型进行转换
 
 // 5.字符串  s1 := "hello"
 // 5.1.字符串转义
 
-// func main() {
-// 	fmt.Println("str := \"c:\\Code\\lesson1\\go.ext\"")
-// }
+//func main() {
+//	fmt.Println("str := \"c:\\Code\\lesson1\\go.ext\"")
+//}
 
 // 5.2.多行字符串和操作
 
-// func main() {
-// 	s1 := `第一行
-// 	第二行
-// 	第三行`
-// 	s2 := `第四行
-// 	第五行
-// 	第六行`
-// 	fmt.Println(s1)
-// 	fmt.Println(s2)
-// 	fmt.Printf("s1+s2的长度为 %d", len(s1+s2))
-// }
+//func main() {
+//	s1 := `第一行
+//	第二行
+//	第三行`
+//	s2 := `第四行
+//	第五行
+//	第六行`
+//	fmt.Println(s1)
+//	fmt.Println(s2)
+//	fmt.Printf("s1+s2的长度为 %d", len(s1+s2))
+//}
 
 // 6.byte和rune类型
 /*
@@ -70,17 +68,17 @@ go 语言的字符有一下两种：
 	1. uint8类型,或者叫做byte类型，代表了ascii的一个字符
 	2. rune类型，代表一个utf-8字符
 */
-// func main() {
-// 	s := "hello沙河"
-// 	for i := 0; i < len(s); i++ {
-// 		fmt.Printf("%v(%c) ", s[i], s[i])
-// 	}
-// 	fmt.Println()
-
-// 	for _, r := range s {
-// 		fmt.Printf("%v(%c) ", r, r)
-// 	}
-// }
+//func main() {
+//	s := "hello沙河"
+//	for i := 0; i < len(s); i++ {
+//		fmt.Printf("%v(%c) ", s[i], s[i])
+//	}
+//	fmt.Println()
+//
+//	for _, r := range s {
+//		fmt.Printf("%v(%c) ", r, r)
+//	}
+//}
 
 // 6.1.修改字符串 要修改字符串，需要先将其转换成[]rune或[]byte，完成后再转换为string。无论哪种转换，都会重新分配内存，并复制字节数组。
 // func changeString() {
@@ -165,11 +163,11 @@ go 语言的字符有一下两种：
 
 // 练习题3： 乘法口诀表
 
-func main() {
-	for i := 1; i < 10; i++ {
-		for j := 1; j <= i; j++ {
-			fmt.Printf("%d * %d = %d  ", j, i, i*j)
-		}
-		fmt.Println()
-	}
-}
+//func main() {
+//	for i := 1; i < 10; i++ {
+//		for j := 1; j <= i; j++ {
+//			fmt.Printf("%d * %d = %d  ", j, i, i*j)
+//		}
+//		fmt.Println()
+//	}
+//}

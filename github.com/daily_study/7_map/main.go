@@ -1,5 +1,7 @@
 package main
 
+import "fmt"
+
 // go map 学习
 
 // map是一种无序的基于key-value的数据结构，go语言中的map是引用类型，必须初始化才能使用
@@ -73,69 +75,69 @@ package main
 // }
 
 // 6.按照指定顺序遍历map
-// func main() {
-// 	rand.Seed(time.Now().UnixNano())
-
-// 	var scoreMap = make(map[string]int, 200)
-
-// 	for i := 0; i < 100; i++ {
-// 		key := fmt.Sprintf("stu%02d", i)
-// 		value := rand.Intn(100)
-// 		scoreMap[key] = value
-
-// 		// 取出map中的所有key存入切片keys
-// 		var keys = make([]string, 0, 200)
-// 		for key := range scoreMap {
-// 			keys = append(keys, key)
-// 		}
-// 		// 对切片进行排序
-// 		sort.Strings(keys)
-
-// 		// 按照排序之后的key遍历map
-// 		for _, key := range keys {
-// 			fmt.Println(key, scoreMap[key])
-// 		}
-// 	}
-// }
+//func main() {
+//	rand.Seed(time.Now().UnixNano())
+//
+//	var scoreMap = make(map[string]int, 200)
+//
+//	for i := 0; i < 100; i++ {
+//		key := fmt.Sprintf("stu%02d", i)
+//		value := rand.Intn(100)
+//		scoreMap[key] = value
+//	}
+//	// 取出map中的所有key存入切片keys
+//	var keys = make([]string, 0, 200)
+//	for key := range scoreMap {
+//		fmt.Printf("key的值为: %s, key的类型为: %T, %v, %+v\n", key, key, key, key)
+//		keys = append(keys, key)
+//	}
+//	// 对切片进行排序
+//	sort.Strings(keys)
+//
+//	// 按照排序之后的key遍历map
+//	for _, key := range keys {
+//		fmt.Println(key, scoreMap[key])
+//	}
+//}
 
 // 7.元素为map类型的切片
-// func main() {
-// 	var mapSlice = make([]map[string]string, 3)
-
-// 	for index, value := range mapSlice {
-// 		fmt.Printf("index:%d value:%v\n", index, value)
-// 	}
-
-// 	fmt.Println("after init")
-// 	// 对切片中的map元素进行初始化
-// 	mapSlice[0] = make(map[string]string, 10)
-// 	mapSlice[0]["name"] = "小王子"
-// 	mapSlice[0]["password"] = "123456"
-// 	mapSlice[0]["addresss"] = "沙河"
-
-// 	for index, value := range mapSlice {
-// 		fmt.Printf("index:%d value:%v\n", index, value)
-// 	}
-// }
+//func main() {
+//	var mapSlice = make([]map[string]string, 3)
+//
+//	for index, value := range mapSlice {
+//		fmt.Printf("index:%d value:%v\n", index, value)
+//	}
+//
+//	fmt.Println("after init")
+//	// 对切片中的map元素进行初始化
+//	mapSlice[0] = make(map[string]string, 10)
+//	mapSlice[0]["name"] = "小王子"
+//	mapSlice[0]["password"] = "123456"
+//	mapSlice[0]["address"] = "沙河"
+//
+//	for index, value := range mapSlice {
+//		fmt.Printf("index:%d value:%v\n", index, value)
+//	}
+//}
 
 // 8.值为切片类型的map
-// func main() {
-// 	var sliceMap = make(map[string][]string, 3)
-
-// 	fmt.Println(sliceMap)
-// 	fmt.Println("after init")
-
-// 	key := "中国"
-
-// 	value, ok := sliceMap[key]
-// 	if !ok {
-// 		value = make([]string, 0, 2)
-// 	}
-// 	value = append(value, "北京", "上海")
-// 	value = append(value, "深圳", "重庆")
-// 	sliceMap[key] = value
-// 	fmt.Println(sliceMap)
-// }
+//func main() {
+//	var sliceMap = make(map[string][]string, 3)
+//
+//	fmt.Println(sliceMap)
+//	fmt.Println("after init")
+//
+//	key := "中国"
+//
+//	value, ok := sliceMap[key]
+//	if !ok {
+//		value = make([]string, 0, 2)
+//	}
+//	value = append(value, "北京", "上海")
+//	value = append(value, "深圳", "重庆")
+//	sliceMap[key] = value
+//	fmt.Println(sliceMap)
+//}
 
 // 练习题 1
 // func main() {
@@ -154,14 +156,15 @@ package main
 // }
 
 // 练习题 2 运行结果
-// func main() {
-// 	type Map map[string][]int
-// 	m := make(Map)
-// 	s := []int{1, 2}
-// 	s = append(s, 3)
-// 	fmt.Printf("%+v\n", s)
-// 	m["q1mi"] = s
-// 	s = append(s[:1], s[2:]...)
-// 	fmt.Printf("%+v\n", s)
-// 	fmt.Printf("%+v\n", m["q1mi"])
-// }
+func main() {
+	type Map map[string][]int
+	m := make(Map)
+	s := []int{1, 2}
+	fmt.Printf("s的类型为：%T\n", s)
+	s = append(s, 3)
+	fmt.Printf("%+v\n", s)
+	m["q1mi"] = s
+	s = append(s[:1], s[2:]...)
+	fmt.Printf("%+v\n", s)
+	fmt.Printf("%+v\n", m["q1mi"])
+}

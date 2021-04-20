@@ -250,7 +250,7 @@ func (p *Person) SetDream(dreams []string) {
 }
 
 func (p *Person) SetDream1(dreams []string){
-	p.dreams = make([]string, len(dreams))
+	p.dreams = make([]string, len(dreams)) // 分配内存
 	copy(p.dreams, dreams)
 }
 
@@ -259,7 +259,7 @@ func main() {
 	data := []string{"吃饭", "睡觉", "打豆豆"}
 	p1.SetDream1(data)
 
-	// 想要修改p1.dreams
+	// 想要修改p1.dreams， 都是切片，修改都是在原信息上修改，直接生效
 	data[1] = "不睡觉"
 	p1.dreams[1] = "不睡觉"
 	fmt.Println(data) 	// [吃饭 不睡觉 打豆豆]

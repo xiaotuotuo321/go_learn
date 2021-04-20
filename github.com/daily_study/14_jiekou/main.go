@@ -113,8 +113,8 @@ type writer interface {
 //type Student struct {}
 //
 //func (s *Student) Speak(think string) (talk string){
-//	if think == "sb" {
-//		talk = "你是大帅比"
+//	if think == "ls" {
+//		talk = "你是ls"
 //	} else {
 //		talk = "您好"
 //	}
@@ -123,7 +123,7 @@ type writer interface {
 //
 //func main() {
 //	var peo People = &Student{}
-//	think := "bitch"
+//	think := "ll"
 //	fmt.Println(peo.Speak(think))
 //}
 
