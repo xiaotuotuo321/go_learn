@@ -1,7 +1,10 @@
 package main
 
 import (
+	"bufio"
+	"flag"
 	"fmt"
+	"io"
 	"os"
 )
 
@@ -100,14 +103,104 @@ perm: 文件追加，一个八进制数，r(读)04，w(写)02，x(执行)01
 */
 
 // 2.1.write和writeString
-func main() {
-	file, err := os.OpenFile("xx.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY,0666)
-	if err != nil{
-		fmt.Println("open file failed, err:", err)
+//func main() {
+//	file, err := os.OpenFile("xx.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY,0666)
+//	if err != nil{
+//		fmt.Println("open file failed, err:", err)
+//	}
+//	defer file.Close()
+//	str := "hello 沙河"
+//	file.Write([]byte(str))		// 写入字节切片数据
+//	file.WriteString("hello 小王子")	// 直接写入字符串数据
+//}
+
+// 2.2.bufio.NewWriter
+//func main() {
+//	file, err := os.OpenFile("xx.txt", os.O_CREATE|os.O_TRUNC|os.O_WRONLY, 0666)
+//	if err != nil{
+//		fmt.Println("open file failed, err:", err)
+//		return
+//	}
+//
+//	defer file.Close()
+//	writer := bufio.NewWriter(file)
+//	for i := 0; i < 10; i++ {
+//		writer.WriteString("Hello 小红\n")		// 将数据先写入缓存
+//		if i == 5{
+//			break
+//		}
+//	}
+//	writer.Flush()	// 将缓存中的内容写入文件
+//}
+
+// 2.3.ioutil.WriteFile  直接生成一个新文件并写入内容
+//func main() {
+//	str := "hello 沙河"
+//	err := ioutil.WriteFile("./xx.txt", []byte(str), 0666)
+//	if err != nil{
+//		fmt.Println("write file failed, err:", err)
+//		return
+//	}
+//}
+
+// 3.练习
+// 3.1.借助io.Copy()实现一个拷贝文件函数
+// 拷贝文件函数
+//func CopyFile(dstName, srcName string) (written int64, err error){
+//	// 以读方式打开源文件
+//	src, err := os.Open(srcName)
+//	if err != nil{
+//		fmt.Printf("open %s failed, err:%v.\n", srcName, err)
+//		return
+//	}
+//	defer src.Close()
+//	// 以写|创建的方式打开目标文件
+//	dst, err := os.OpenFile(dstName, os.O_WRONLY|os.O_CREATE, 0644)
+//	if err != nil{
+//		fmt.Printf("open %s failed, err:%v.\n", dstName, err)
+//		return
+//	}
+//	defer dst.Close()
+//	return io.Copy(dst, src)	// 调用io.Copy()拷贝内容
+//}
+//
+//func main() {
+//	_, err := CopyFile("dst.txt", "src.txt")
+//	if err != nil{
+//		fmt.Println("copy file failed, err:", err)
+//		return
+//	}
+//	fmt.Println("copy done!")
+//}
+
+// 3.2.实现cat命令
+// 使用文件操作相关知识，模拟实现linux平台cat命令的功能
+// cat命令实现
+func cat(r *bufio.Reader){
+	for{
+		buf, err := r.ReadBytes('\n')	// 字符
+		if err == io.EOF{
+			// 退出之前将读取到的内容输出
+			fmt.Fprintf(os.Stdout, "%s", buf)
+			break
+		}
+		fmt.Fprintf(os.Stdout, "%s", buf)
 	}
-	defer file.Close()
-	str := "hello 沙河"
-	file.Write([]byte(str))		// 写入字节切片数据
-	file.WriteString("hello 小王子")
 }
 
+func main() {
+	flag.Parse()	// 解析命令行参数
+	if flag.NArg() == 0{
+		// 如果没有参数默认从标准输入读取到内容
+		cat(bufio.NewReader(os.Stdin))
+	}
+	// 依次读取每个指定文件的内容并打印到终端
+	for i:=0; i < flag.NArg(); i++{
+		f, err := os.Open(flag.Arg(i))
+		if err != nil{
+			fmt.Fprintf(os.Stdout, "reading from %s failed, err:%v\n", flag.Arg(i), err)
+			continue
+		}
+		cat(bufio.NewReader(f))
+	}
+}
