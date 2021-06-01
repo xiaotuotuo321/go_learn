@@ -1,10 +1,5 @@
 package main
 
-import (
-	"fmt"
-	"strconv"
-)
-
 // go语言内置的strconv：实现了基本数据类型和其字符串表示的相互转换
 
 // strconv包实现了基本数据类型与其字符串表示的转换，只要有以下常用的函数：Atoi(),Itia(),parse系列，format系列，append系列
@@ -92,13 +87,20 @@ fmt表示格式：’f’（-ddd.dddd）、’b’（-ddddp±ddd，指数为二�
 prec控制精度（排除指数部分）：对’f’、’e’、’E’，它表示小数点后的数字个数；对’g’、’G’，它控制总的数字个数。如果prec 为-1，则代表使用最少数量的、但又必需的数字来表示f。
 */
 
-func main() {
-	s1 := strconv.FormatBool(true)
-	s2 := strconv.FormatFloat(3.1415, 'E', -1, 64)
-	s3 := strconv.FormatInt(-2, 16)
-	s4 := strconv.FormatUint(2, 16)
-	fmt.Println(s1, s2, s3, s4)
-}
+//func main() {
+//	s1 := strconv.FormatBool(true)
+//	s2 := strconv.FormatFloat(3.1415, 'E', -1, 64)
+//	s3 := strconv.FormatInt(-2, 16)
+//	s4 := strconv.FormatUint(2, 16)
+//	fmt.Println(s1, s2, s3, s4)
+//}
 
+// 4.1. isPrint(r rune) bool 返回一个字符串是否可打印的，和unicode.IsPrint一样，r必须是：字母、数字、标点、符号、ASCII空格
+
+// 4.2. CanBackQuote(s string) bool
+// 返回字符串s是否可以不被修改的表示为一个单行的、没有空格和tab之外控制字符的反引号字符串
+
+
+// 除此之外，strconv包中还有Append系列、quote系列等函数
 
 
