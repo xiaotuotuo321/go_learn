@@ -155,12 +155,12 @@ package main
 
 // 3.2.自定义server
 // 管理服务端的行为，可以创建一个自定义的Server：
-s := &http.Server{
-	Addr: 				":8080",
-	Handler:			myHandler,
-	ReadTimeOut:		10 * time.Second,
-	WriteTimeOut:		10 * time.Second,
-	MaxHeaderBytes: 	1 << 20,
-}
-log.Fatal(s.ListenAndServer())
+//s := &http.Server{
+//	Addr: 				":8080",
+//	Handler:			myHandler,
+//	ReadTimeOut:		10 * time.Second,
+//	WriteTimeOut:		10 * time.Second,
+//	MaxHeaderBytes: 	1 << 20,
+//}
+//log.Fatal(s.ListenAndServer())
 
