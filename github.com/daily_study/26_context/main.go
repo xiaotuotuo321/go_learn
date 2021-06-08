@@ -1,5 +1,7 @@
 package main
 
+import "time"
+
 // go标准库的Context
 
 // 在go http包的server中，每一个请求都有一个对应的goroutine去处理。请求处理函数通常会启动额外的goroutine用来访问后端服务，如果数据库和RPC服务.
@@ -162,3 +164,25 @@ GO1.7加入了一个新的标准库context，定义了context类型，专门用�
 withTimeout、withValue创建的派生上下文。当一个上下文被取消时，它派生的所有上下文也被取消
 */
 
+// 3.context接口： context.Context是一个接口，该接口定义了四个需要实现的方法。
+type Context interface{
+	Deadline() (deadline time.Time, ok bool)
+	Done() <- chan struct{}
+	Err() error
+	Value(key interface{}) interface{}
+}
+
+/*
+Deadline方法需要返回当前Context被取消的时间，也就是完成工作的截止时间
+Done方法需要返回一个channel，这个channel会在当前工作完成或者上下文被取消之后关闭，多次调用Done方法会返回同一个channel
+Err 方法会返回当前context结束的原因，他只会在done返回的channel被关闭时才会返回非空的值
+	如果当前context被取消就会返回canceled错误
+	如果当前context超时就会返回deadlineExceeded错误
+value方法会从context中返回键对应的值，对于同一个上下文来说，多次调用value并传入相同的key会返回相同的结果，该方法仅用于传递跨API和进程间请求域的数据；
+*/
+
+// 4.with系列函数
+// 4.1.withCancel的函数标签
+// func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
+// withCancel 返回带有新Done通道的父节点的副本。当调用返回的cancel函数或当关闭父上下文的Done通道时，将关闭返回上下文的Done通道，无论先发生什么情况
+// 取消此上下文将释放与其关联的资源，一次代码应该在此上下文中运行的操作完成后立即调用cancel
