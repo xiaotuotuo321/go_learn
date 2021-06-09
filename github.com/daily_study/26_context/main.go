@@ -1,7 +1,5 @@
 package main
 
-import "time"
-
 // go标准库的Context
 
 // 在go http包的server中，每一个请求都有一个对应的goroutine去处理。请求处理函数通常会启动额外的goroutine用来访问后端服务，如果数据库和RPC服务.
@@ -165,12 +163,12 @@ withTimeout、withValue创建的派生上下文。当一个上下文被取消时
 */
 
 // 3.context接口： context.Context是一个接口，该接口定义了四个需要实现的方法。
-type Context interface{
-	Deadline() (deadline time.Time, ok bool)
-	Done() <- chan struct{}
-	Err() error
-	Value(key interface{}) interface{}
-}
+//type Context interface{
+//	Deadline() (deadline time.Time, ok bool)
+//	Done() <- chan struct{}
+//	Err() error
+//	Value(key interface{}) interface{}
+//}
 
 /*
 Deadline方法需要返回当前Context被取消的时间，也就是完成工作的截止时间
@@ -186,3 +184,151 @@ value方法会从context中返回键对应的值，对于同一个上下文来�
 // func WithCancel(parent Context) (ctx Context, cancel CancelFunc)
 // withCancel 返回带有新Done通道的父节点的副本。当调用返回的cancel函数或当关闭父上下文的Done通道时，将关闭返回上下文的Done通道，无论先发生什么情况
 // 取消此上下文将释放与其关联的资源，一次代码应该在此上下文中运行的操作完成后立即调用cancel
+
+//func gen(ctx context.Context) <- chan int{
+//	dst := make(chan int)
+//	n := 1
+//	go func(){
+//		for {
+//			select {
+//			case <- ctx.Done():
+//				return // return 结束该goroutine，防止泄露
+//			case dst <- n:
+//				n++
+//			}
+//		}
+//	}()
+//	return dst
+//}
+//
+//func main() {
+//	ctx, cancel := context.WithCancel(context.Background())
+//	defer cancel()	// 当取完需要的整数后调用cancel
+//	for n := range gen(ctx){
+//		fmt.Println(n)
+//		if n == 100{
+//			break
+//		}
+//	}
+//}
+
+// gen 函数在单独的goroutine中生成整数并将它们发送到返回的通道，gen的调用者在使用生成的整数之后需要取消上下文，以免gen启动的内部goroutine发生泄露
+
+// 4.2.withDeadline的函数签名：func WithDeadline(parent Context, deadline time.Time) (Context, CancelFunc)
+/*
+返回父上下文的副本，并将deadline调整为不迟于D。如果父上下文的deadline已经早于d,则WithDeadline(parent, d)在语义上等于父上下文。当截止日期过期时，
+当调用返回的cancel函数时，或者当父上下文的Done函数关闭时，返回上下文的Done通道将被关闭，以最先发生的情况为准。
+
+取消此上下文将释放与其关联的资源，因此代码应该在此上下文中运行的操作完成后立即调用cancel
+*/
+
+//func main() {
+//	d := time.Now().Add(500 * time.Millisecond)
+//	ctx, cancel := context.WithDeadline(context.Background(), d)
+//
+//	// 尽管ctx会过期，但在任何情况下调用它的cancel函数都是很好的时间
+//	// 如果不这样做，可能会使上下文及其父类存活的时间超过必要的时间。
+//
+//	defer cancel()
+//	select{
+//	case <- time.After(1 * time.Second):
+//		fmt.Println("overslept")
+//	case <- ctx.Done():
+//		fmt.Println(ctx.Err())
+//	}
+//}
+
+// 上面的代码中，定义了一个50毫秒之后过期的deadline，然后调用context.WithDeadline(context.Background(), d)得到一个上下文（ctx）和一个取消
+// 函数(cancel) 然后使用一个select让主程序陷入等待状态：等待1秒时间打印overslept退出或者等待ctx过期后退出。因为ctx50毫秒之后就过期。所以
+// ctx.Done()会先接收到值，然后ctx.Err会打印取消的原因
+
+// 4.3.WithTimeout func WithTimeOut(parent Context, timeout time.Duration) (Context, CancelFunc)
+// WithTimeout 返回WithDeadline(parent, time.Now().Add(timeout))
+// 取消此上下文将释放与其相关的资源，因此代码应该在此上下文中运行的操作完成后立即调用cancel，通常用于数据库或者网络连接的超时控制。
+
+//var wg sync.WaitGroup
+//func worker(ctx context.Context){
+//LOOP:
+//	for {
+//		fmt.Println("db connecting...")
+//		time.Sleep(time.Millisecond * 10)	// 假设正常连接数据库耗时10毫秒
+//		select{
+//		case <- ctx.Done():	// 50毫秒后自动调用
+//			break LOOP
+//		default:
+//		}
+//	}
+//	fmt.Println("worker done!")
+//	wg.Done()
+//}
+//
+//func main() {
+//	// 设置一个50毫秒的超时
+//	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond * 50)
+//	wg.Add(1)
+//	go worker(ctx)
+//	time.Sleep(time.Second * 5)
+//	cancel() // 通知子goroutine结束
+//	wg.Wait()
+//	fmt.Println("over")
+//}
+
+// 4.4.WithValue 能够将请求作用域的数据与Context对象建立关系。
+// func WithValue(parent Context, key, val interface{}) Context
+// WithValue 返回父节点的副本，其中与key关联的值为val
+/*
+仅对API和进程间传递请求域的数据使用上下文值，而不是使用它来传递参数给函数。 ***************
+所提供的键必须是可比较的，并且不应该是string类型或任何其他内置类型，以避免使用上下文在包之间发生冲突。WithValue的用户应该为键定义自己的类型。为了
+避免在分配给interface{}时进行分配，上下文键通常具有具体类型struct{}。或者，导出的上下文关键变量的静态类型应该是指针或接口。
+*/
+
+//type TraceCode string
+//var wg sync.WaitGroup
+//
+//
+//func worker(ctx context.Context){
+//	key := TraceCode("TRACE_CODE")
+//
+//	traceCode, ok := ctx.Value(key).(string)
+//
+//	if !ok{
+//		fmt.Println("invalid trace code")
+//	}
+//LOOP:
+//	for{
+//		fmt.Printf("worker, trace code:%s\n", traceCode)
+//		time.Sleep(time.Millisecond * 10)	// 假设正常连接数据库耗时10毫秒
+//		select{
+//		case <- ctx.Done():
+//			break LOOP
+//		default:
+//		}
+//	}
+//	fmt.Println("worker done!")
+//	wg.Done()
+//}
+//
+//func main() {
+//	// 设置一个50毫秒的超时
+//	ctx, cancel := context.WithTimeout(context.Background(), time.Millisecond * 50)
+//	// 在系统的入口中设置trace code 传递给后续启动的goroutine实现日志数据聚合
+//	ctx = context.WithValue(ctx, TraceCode("TRACE_CODE"), "1111111111111")
+//	wg.Add(1)
+//	go worker(ctx)
+//	time.Sleep(time.Second * 5)
+//	cancel() // 通知子goroutine结束
+//	wg.Wait()
+//	fmt.Println("over")
+//}
+
+// 5.使用context的注意事项
+/*
+	1.推荐以参数的方式显示传递context
+	2.以context为参数的函数，应该以context为第一个参数
+	3.给一个函数传递context的时候，不要传递nil，不知道传递什么的时候，传递context.TODO()
+	4.context的value相关方法应该传递请求域的必要参数，比应该用于传递可选参数
+	5.context是线程安全的，可以放心的在多个goroutine中是用
+*/
+
+// 6.客户端超时取消示例：调用服务端API时如何在客户端实现超时控制  调用服务端的API时如何在客户端实现超时控制？
+
