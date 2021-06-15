@@ -173,5 +173,164 @@ type user struct{
 
 // 3.mysql预处理
 /*
+普通sql语句执行过程：
+	1.客户端对SQL语句进行占位符替换得到完整的SQL语句
+	2.客户端发送完整SQL语句到MySQL服务端
+	3.MySQL服务端执行完整的SQL语句并将结果返回给客户端
 
+预处理进行过程：
+	1.把SQL语句分成两部分，命令部分和数据部分
+	2.先把命令部分发送给MySQL服务端，MySQL服务端进行SQL预处理
+	3.然后把数据部分发送给MySQL服务端，MySQL服务端对SQL语句进行占位符替换
+	4.MySQL服务端执行完整的语句并将结果返回给客户端
+
+为什么要预处理？
+	1.优化MySQL服务器重复执行SQL方法，可以提升服务器性能，提前让服务器编译，一次编译多次执行，节省后续编译的成本
+	2.避免SQL注入问题
 */
+
+// 3.1.go实现MySQL预处理
+// database/sql中使用prepare方法来实现预处理操作	func (db *DB) Prepare (query string) (*Stmt, error)
+// prepare方法会先将SQL语句发送给MySQL服务端，返回一个准备好的状态用于之后的查询和命令。返回值可以同时执行多个查询和命令
+// 查询操作的预处理示例代码
+//func prepareQueryDemo() {
+//	sqlStr := "select id, name, age from user where id > ?"
+//	stmt, err := db.Prepare(sqlStr)
+//	if err != nil{
+//		fmt.Printf("prepare failed, err:%v\n", err)
+//		return
+//	}
+//	defer stmt.Close()
+//	rows, err := stmt.Query(0)
+//	if err != nil{
+//		fmt.Printf("query failed, err:%v", err)
+//		return
+//	}
+//	defer rows.Close()
+//	// 循环读取结果集中的数据
+//	for rows.Next(){
+//		var u user
+//		err := rows.Scan(&u.id, &u.age, &u.name)
+//		if err != nil{
+//			fmt.Printf("sacn failed, err: %v\n", err)
+//			return
+//		}
+//		fmt.Printf("id:%d name:%s age:%d\n", u.id, u.name, u.age)
+//	}
+//}
+
+// 3.2.插入、更新和删除操作的预处理十分相似，这里以插入操作的预处理为例
+//func prepareInsertDemo() {
+//	sqlStr := "insert into user(name, age) values (?, ?)"
+//	stmt, err := db.Prepare(sqlStr)
+//	if err != nil{
+//		fmt.Printf("prepare failed, err:%v\n", err)
+//		return
+//	}
+//	defer stmt.Close()
+//	_, err = stmt.Exec("小王子", 18)
+//	if err != nil{
+//		fmt.Printf("insert failed, err:%v\n", err)
+//		return
+//	}
+//	_, err = stmt.Exec("haha", 19)
+//	if err != nil{
+//		fmt.Printf("insert failed, err:%v\n", err)
+//		return
+//	}
+//	fmt.Println("insert success.")
+//}
+
+// 3.3.SQL注入问题：  ***任何时候都不应该自己拼接SQL语句
+// SQL注入的例子
+//func sqlInjectDemo(name string){
+//	sqlStr := fmt.Sprintf("select id, name, age, from user where name='%s'", name)
+//	fmt.Printf("SQL:%s\n", sqlStr)
+//	var u user
+//	err := db.QueryRow(sqlStr).Scan(&u.id, &u.age, &u.name)
+//	if err != nil{
+//		fmt.Printf("exec failed, err:%v\n", err)
+//		return
+//	}
+//	fmt.Printf("user:%#v\n", u)
+//}
+
+// 下面的字符串都能引起上面的方法SQL注入问题
+/*
+sqlInjectDemo("xxx" or 1=1#)
+sqlInjectDemo("xxx" union select * from user #)
+sqlInjectDemo("xxx" and (select count(*) from user) < 10#)
+*/
+
+// 4.go 实现MySQL事务
+/*
+什么是事务？
+事务：一个最小的不可再分的工作单元；通常一个事务对应的是一个完整的业务（比如银行账户转账业务，该业务就是一个最小的工作单元，同时这个完整的业务西药执行多次的DML（
+insert, update, delete）语句等共同联合完成，比如由A转账给B，这里面就需要执行两次update操作）
+
+在MySQL中只有使用了innodb数据库引擎的数据库或表才支持事务，事务处理可以用来维护数据的完整性，保证成批的SQL语句要么全部执行，要么全部不执行
+
+事务的ACID：
+通常事务必须满足四个条件（ACID）：原子性，一致性，隔离性，持久性
+原子性：一个事务中的所有操作，要么全部完成，要么全部不完成，不会结束在中间某个环节。事务在执行过程中发生错误，会被回滚，到书屋开始前的状态，就像这个事务从来没有执行过一样
+一致性：在事务开始之前和事务结束之后，数据库的完整性没有被破坏，这表示写入的资料必须完全复合物所有的预设规则，这包含资料的准确度、串联性以及后续数据库可以自发性地完成预定的工作
+隔离性：数据库允许多个事务同时对其数据进行读写和修改的能力，隔离性可以防止多个事务并发执行时由于交叉执行而导致数据的不一致。事务隔离分为不同级别，包括读未提交，读提交，可重复读，串行化
+持久性：事务处理结束后，对数据的修改就是永久的，即便系统故障也不会丢失
+*/
+
+// 4.1.事务的相关方法：
+// 开始事务： func (db *DB) Begin() (*Tx, error)
+// 提交事务：func (db *DB) Commit() error
+// 回滚事务：func (db *DB) RollBack() error
+
+// 4.2.事务示例
+//func transactionDemo() {
+//	tx, err := db.Begin()	// 开启事务
+//	if err != nil{
+//		if tx != nil{
+//			tx.Rollback()	// 回滚
+//		}
+//		fmt.Printf("begin trans failed, err: %v\n", err)
+//		return
+//	}
+//	sqlStr1 := "Update user set age = 20 where id = ?"
+//	ret1, err := tx.Exec(sqlStr1, 2)
+//	if err != nil{
+//		tx.Rollback()
+//		fmt.Printf("exec sql failed, err:%v\n", err)
+//		return
+//	}
+//
+//	affRow1, err := ret1.RowsAffected()
+//	if err != nil{
+//		tx.Rollback()	// 回滚
+//		fmt.Printf("exec ret1.RowsAffected() failed, err:%v\n", err)
+//		return
+//	}
+//
+//	sqlStr2 := "Update user set age = 40 where id = ?"
+//	ret2, err := tx.Exec(sqlStr2, 3)
+//	if err != nil{
+//		tx.Rollback()
+//		fmt.Printf("exec sql failed, err:%v\n", err)
+//		return
+//	}
+//
+//	affRow2, err := ret2.RowsAffected()
+//	if err != nil{
+//		tx.Rollback()	// 回滚
+//		fmt.Printf("exec ret1.RowsAffected() failed, err:%v\n", err)
+//		return
+//	}
+//	fmt.Println(affRow1, affRow2)
+//	if affRow1 == 1 && affRow2 == 1{
+//		fmt.Println("事务提交")
+//		tx.Commit()
+//	} else {
+//		tx.Rollback()
+//		fmt.Println("事务回滚")
+//	}
+//	fmt.Println("exec trans success!")
+//}
+
+// 5.练习题： 结合net/http和database/sql实现一个使用MySQL存储用户信息的注册及登陆的简易web程序。
