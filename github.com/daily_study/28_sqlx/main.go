@@ -1,6 +1,7 @@
 package main
 
 import (
+	"fmt"
 	"github.com/jmoiron/sqlx"
 )
 
@@ -19,18 +20,18 @@ type User struct {
 	Age int	`json:"age"`
 }
 
-//func initDB(err error){
-//	dsn := "root:123456@tcp(127.0.0.1:3306)/sql_test"
-//	db, err = sqlx.Connect("mysql", dsn)
-//	if err != nil{
-//		fmt.Printf("connect db failed, err:%v\n", err)
-//		return
-//	}
-//
-//	db.SetMaxIdleConns(10)
-//	db.SetMaxOpenConns(20)
-//	return
-//}
+func initDB() (err error){
+	dsn := "root:123456@tcp(127.0.0.1:3306)/sql_test"
+	db, err = sqlx.Connect("mysql", dsn)
+	if err != nil{
+		fmt.Printf("connect db failed, err:%v\n", err)
+		return
+	}
+
+	db.SetMaxIdleConns(10)
+	db.SetMaxOpenConns(20)
+	return
+}
 
 // 2.2.查询单行数据
 //func queryRowDemo(){
@@ -232,11 +233,113 @@ CREATE TABLE `user` (
 
 // 3.2.自己拼接语句实现批量插入
 // BatchInsertUsers 自行构造批量插入的语句
-func BatchInsertUsers(users []*User) error {
-	valueStrings := make([]string, 0, len(users))
-	// 存放values的slice
-	valueArgs := make([]interface{}, 0, len(users) * 2)
-	// 遍历users准备相关数据
+//func BatchInsertUsers(users []*User) error {
+//	valueStrings := make([]string, 0, len(users))
+//	// 存放values的slice
+//	valueArgs := make([]interface{}, 0, len(users) * 2)
+//	// 遍历users准备相关数据
+//	for _, u := range users{
+//		// 此处占位符和插入值的个数对应
+//		valueStrings = append(valueStrings, "(?, ?)")
+//		valueArgs = append(valueArgs, u.Name)
+//		valueArgs = append(valueArgs, u.Age)
+//	}
+//	// 自行拼接要执行的具体语句
+//	stmt := fmt.Sprintf("Insert into user (name, age) values %s", strings.Join(valueStrings, ","))
+//	_, err := db.Exec(stmt, valueArgs...)
+//	return err
+//}
+//
+////// 3.3.使用sqlx.In实现批量插入：前提是结构体需要实现driver.Valuer 接口：
+//func (u User) Value() (driver.Value, error){
+//	return []interface{}{u.Name, u.Age}, nil
+//}
+//
+//func BatchInsertUsers2 (users []interface{}) error {
+//	query, args, _ := sqlx.In(
+//		"insert into user (name, age) values (?), (?), (?)",
+//		users..., // 如果arg实现了driver.Valuer, sqlx.In 会通过value()来展开它
+//		)
+//	fmt.Println(query) // 查看生成的querystring
+//	fmt.Println(args) // 查看生成的args
+//	_, err := db.Exec(query, args...)
+//	return err
+//}
+//
+//// 3.4.使用NamedExec实现批量插入
+////func BatchInsertUsers3 使用NamedExec实现批量插入
+//func BatchInsertUsers3(users []*User) error {
+//	_, err := db.NamedExec("insert into user (name, age) values (:name, :age)", users)
+//	return err
+//}
+//
+//func main() {
+//	err := initDB()
+//	if err != nil{
+//		panic(err)
+//	}
+//	defer db.Close()
+//	u1 := User{Name:"小明", Age: 14}
+//	u2 := User{Name:"小红", Age: 18}
+//	u3 := User{Name:"小黄", Age: 20}
+//
+//	// 方法1:
+//	users := []*User{&u1, &u2, &u3}
+//	err = BatchInsertUsers(users)
+//	if err != nil{
+//		fmt.Printf("BatchInsertUsers failed, err: %v\n", err)
+//	}
+//
+//	// 方法2：
+//	users2 := []interface{}{u1, u2, u3}
+//	err = BatchInsertUsers2(users2)
+//	if err != nil{
+//		fmt.Printf("BatchInsertUsers2 failed, err: %v\n", err)
+//	}
+//
+//	// 方法3：
+//	users3 := []*User{&u1, &u2, &u3}
+//	err = BatchInsertUsers3(users3)
+//	if err != nil{
+//		fmt.Printf("BatchInsertUsers3 failed, err: %v\n", err)
+//	}
+//}
 
-}
+// 3.5. sqlx.In 实现了一个in 方法，且可以按照可排序字段排序返回 in函数 和 find_in_set 函数
+// select * from user where id in (1, 2, 3)
+// select * from user where id in (1, 2, 3) order by find_in_set(id, '3, 2, 1')
+
+// 3.5.1. in函数使用 querybyids 根据给定ID查询
+//func QueryByIds(ids []int) (users []User, err error){
+//	// 动态填充ID
+//	query, args, err := sqlx.In("select name, age from user where id in ()", ids)
+//	if err != nil{
+//		return
+//	}
+//	// sqlx.in 返回`？` bindvar 的查询语句，我们使用rebind()重新绑定它
+//	query = db.Rebind(query)
+//
+//	err = db.Select(&users, query, args...)
+//	return
+//}
+//
+//// 3.5.2. in查询和find_in_set函数
+//// 查询ID在给定ID的集合的数据并维持给定ID集合的顺序
+//// QueryAndOrderByIds 按照指定的ID查找数据，并按照一定的ID顺序返回
+//
+//func QueryAndOrderByIds(ids []int) (users []User, err error){
+//	// 动态填充ID
+//	strIDs := make([]string, 0, len(ids))
+//	for _, id := range ids{
+//		strIDs = append(strIDs, fmt.Sprintf("%d", id))
+//	}
+//
+//	query, args, err := sqlx.In("select name, age from user where id in (?) order by find_in_set (id, ?)", ids, strings.Join(strIDs, ","))
+//
+//	query = db.Rebind(query)
+//
+//	err = db.Select(&users, query, args...)
+//	return
+//}
+
 
