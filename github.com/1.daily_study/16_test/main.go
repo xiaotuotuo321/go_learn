@@ -109,11 +109,11 @@ func TestLog(t *testing.T){ ... }
 $ go test -bench=Split
 	goos: darwin
 	goarch: amd64
-	pkg: go_learn/github.com/daily_study/16_test/split
+	pkg: go_learn/github.com/1.daily_study/16_test/split
 	cpu: Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
 	BenchmarkSplit-4         5332932               214.6 ns/op
 	PASS
-	ok      go_learn/github.com/daily_study/16_test/split   1.848s
+	ok      go_learn/github.com/1.daily_study/16_test/split   1.848s
 
 	其中BenchmarkSplit-4 表示对Split函数进行基准测试, 数字4表示 GOMAXPROCES的值，这个对于并发基准测试很重要。5332932 和 214.6 ns/op
 	表示每次调用Split函数耗时203ns,这个结果是5332932次调用的平均值
@@ -122,22 +122,22 @@ $ go test -bench=Split
 $ go test -bench=Split -benchmem
 	goos: darwin
 	goarch: amd64
-	pkg: go_learn/github.com/daily_study/16_test/split
+	pkg: go_learn/github.com/1.daily_study/16_test/split
 	cpu: Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
 	BenchmarkSplit-4         5228787               222.3 ns/op           112 B/op          3 allocs/op
 	PASS
-	ok      go_learn/github.com/daily_study/16_test/split   1.914s
+	ok      go_learn/github.com/1.daily_study/16_test/split   1.914s
 
 	112 B/op 表示每次操作内存分配了112字节， 3 allocs/op 则表示每次操作进行了3次内存分配。
 优化之后的内存分配
 $ go test -bench=Split -benchmem
 	goos: darwin
 	goarch: amd64
-	pkg: go_learn/github.com/daily_study/16_test/split
+	pkg: go_learn/github.com/1.daily_study/16_test/split
 	cpu: Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
 	BenchmarkSplit-4         9046653               133.8 ns/op            48 B/op          1 allocs/op
 	PASS
-	ok      go_learn/github.com/daily_study/16_test/split   1.880s
+	ok      go_learn/github.com/1.daily_study/16_test/split   1.880s
 
 	使用make函数提前分配内存的改动，减少2/3的内存分配次数，并减少一半的内存分配
 */
@@ -166,12 +166,12 @@ func Benchmark1000(b *testing.B){ benchmark(b, 1000) }
 $ go test -bench=.
 	goos: darwin
 	goarch: amd64
-	pkg: go_learn/github.com/daily_study/16_test/split
+	pkg: go_learn/github.com/1.daily_study/16_test/split
 	cpu: Intel(R) Core(TM) i5-7360U CPU @ 2.30GHz
 	BenchmarkSplit-4                 9273751               128.2 ns/op
 	BenchmarkSplitParallel-4        14585432                79.40 ns/op
 	PASS
-	ok      go_learn/github.com/daily_study/16_test/split   28.127s
+	ok      go_learn/github.com/1.daily_study/16_test/split   28.127s
 
 	还可以通过在测试命令后添加-cpu参数如go test -bench=. -cpu 1来指定使用的CPU数量。
 */

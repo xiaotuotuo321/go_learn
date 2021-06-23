@@ -87,8 +87,8 @@ package main
 // 在运行时，被最后导入的包会最先初始化并调用其init()函数
 import (
 	"fmt"
-	"go_learn/github.com/daily_study/13_bao/a"
-	"go_learn/github.com/daily_study/13_bao/snow"
+	"go_learn/github.com/1.daily_study/13_bao/a"
+	"go_learn/github.com/1.daily_study/13_bao/snow"
 )
 
 func init() {

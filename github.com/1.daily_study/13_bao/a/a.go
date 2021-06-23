@@ -2,7 +2,7 @@ package a
 
 import (
 	"fmt"
-	"go_learn/github.com/daily_study/13_bao/b"
+	"go_learn/github.com/1.daily_study/13_bao/b"
 )
 
 func init(){

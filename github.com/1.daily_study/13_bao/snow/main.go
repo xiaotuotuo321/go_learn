@@ -2,7 +2,7 @@ package snow
 
 import (
 	"fmt"
-	"go_learn/github.com/daily_study/13_bao/calc"
+	"go_learn/github.com/1.daily_study/13_bao/calc"
 )
 
 var (

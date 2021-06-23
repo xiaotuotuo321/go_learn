@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"fmt"
 	_ "github.com/go-sql-driver/mysql"
-	"go_learn/github.com/daily_study/27_mysql/errnum"
+	"go_learn/github.com/1.daily_study/27_mysql/errnum"
 	"io/ioutil"
 	"net/http"
 )

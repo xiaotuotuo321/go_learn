@@ -29,7 +29,7 @@ import (
 // 它接收一个字节切片，返回读取的字节数和可能的具体错误，读到文件末尾会返回0和io.EOF
 //func main() {
 	// 只读方式打开当前目录下的main.go文件
-	//file, err := os.Open("/Users/whp/go/src/go_learn/github.com/daily_study/23_file/main.go")
+	//file, err := os.Open("/Users/whp/go/src/go_learn/github.com/1.daily_study/23_file/main.go")
 	//if err != nil{
 	//	fmt.Println("open file failed! err:", err)
 	//}
@@ -80,7 +80,7 @@ import (
 	//}
 
 	// ioutil.ReadFile读取整个文件
-//	content, err := ioutil.ReadFile("/Users/whp/go/src/go_learn/github.com/daily_study/23_file/main.go")
+//	content, err := ioutil.ReadFile("/Users/whp/go/src/go_learn/github.com/1.daily_study/23_file/main.go")
 //	if err != nil{
 //		fmt.Println("read file failed, err:", err)
 //	}
