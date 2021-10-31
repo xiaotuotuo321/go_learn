@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"go_learn/github.com/2.seven_day/for_Gee/day1/3.base_3/gee"
+	"go_learn/github.com/2.seven_day/1.for_Gee/day1/3.base_3/gee"
 	"net/http"
 )
 
