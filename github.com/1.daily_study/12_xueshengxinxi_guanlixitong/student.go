@@ -5,14 +5,14 @@ import "fmt"
 // 构造学生结构体和方法
 
 type Student struct {
-	id int
+	id          int
 	name, class string
 }
 
 func NewStudent(id int, name, class string) *Student {
 	return &Student{
-		id: id,
-		name: name,
+		id:    id,
+		name:  name,
 		class: class,
 	}
 }
@@ -20,7 +20,7 @@ func NewStudent(id int, name, class string) *Student {
 func InputStudentInfo() (int, *Student) {
 	// 用户输入学生信息
 	var (
-		id int
+		id          int
 		name, class string
 	)
 	fmt.Println("请输入学生ID：")
@@ -47,7 +47,7 @@ func AddStudent() {
 func UpdateStudent() {
 	// 更新学生的信息
 	id, stu := InputStudentInfo()
-	for _, v := range ClassInfo{
+	for _, v := range ClassInfo {
 		if v.id == id {
 			v.id = stu.id
 			v.name = stu.name
@@ -59,7 +59,7 @@ func UpdateStudent() {
 
 func ShowStudent() {
 	// 展示学生信息
-	for _, v := range ClassInfo{
+	for _, v := range ClassInfo {
 		id := v.id
 		name := v.name
 		class := v.class

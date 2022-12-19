@@ -19,4 +19,5 @@ func testArrayPoint(x *[2]int) {
 func testArrayPoint2(x []int) {
 	fmt.Printf("func Array: %p, %v", &x, x)
 	x[1] += 100
+	fmt.Println()
 }
