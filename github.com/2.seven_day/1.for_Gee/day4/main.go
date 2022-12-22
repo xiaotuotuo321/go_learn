@@ -10,7 +10,7 @@ import (
 func main() {
 	r := gee.New()
 
-	r.GET("/index", func(c *gee.Context){
+	r.GET("/index", func(c *gee.Context) {
 		c.HTML(http.StatusOK, "<h1>Index Page</h1>")
 	})
 

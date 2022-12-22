@@ -6,7 +6,7 @@ import (
 	"testing"
 )
 
-func newTestRouter() *router{
+func newTestRouter() *router {
 	r := newRouter()
 
 	r.addRoute("GET", "/", nil)
@@ -17,7 +17,7 @@ func newTestRouter() *router{
 	return r
 }
 
-func TestParsePattern(t *testing.T){
+func TestParsePattern(t *testing.T) {
 	ok := reflect.DeepEqual(parsePattern("/p/:name"), []string{"p", ":name"})
 	ok = ok && reflect.DeepEqual(parsePattern("/p/*"), []string{"p", "*"})
 	ok = ok && reflect.DeepEqual(parsePattern("/p/*name/*"), []string{"p", "*name"})
@@ -27,18 +27,18 @@ func TestParsePattern(t *testing.T){
 	}
 }
 
-func TestGetRoute(t *testing.T){
+func TestGetRoute(t *testing.T) {
 	r := newTestRouter()
 	n, ps := r.getRoute("GET", "/hello/geektutu")
-	if n == nil{
+	if n == nil {
 		t.Fatal("nil shouldn't be returned")
 	}
 
-	if n.pattern != "/hello/:name"{
+	if n.pattern != "/hello/:name" {
 		t.Fatal("should match /hello/:name")
 	}
 
-	if ps["name"] != "geektutu"{
+	if ps["name"] != "geektutu" {
 		t.Fatal("name should be equal to 'geektutu'")
 	}
 
