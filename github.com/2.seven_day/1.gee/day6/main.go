@@ -2,7 +2,7 @@ package main
 
 import (
 	"fmt"
-	"go_learn/github.com/2.seven_day/1.for_Gee/day6/gee"
+	"go_learn/github.com/2.seven_day/1.gee/day6/gee"
 	"html/template"
 	"net/http"
 	"time"
@@ -24,8 +24,8 @@ func main() {
 	r.SetFuncMap(template.FuncMap{
 		"FormatAsDate": FormatAsDate,
 	})
-	r.LoadHTMLGlobal("/Users/whp/go/src/go_learn/github.com/2.seven_day/1.for_Gee/day6/templates/*")
-	r.Static("/assets", "/Users/whp/go/src/go_learn/github.com/2.seven_day/1.for_Gee/day6/static")
+	r.LoadHTMLGlobal("/Users/whp/go/src/go_learn/github.com/2.seven_day/1.gee/day6/templates/*")
+	r.Static("/assets", "/Users/whp/go/src/go_learn/github.com/2.seven_day/1.gee/day6/static")
 
 	stu1 := &student{"geektutu", 20}
 	stu2 := &student{"jack", 22}

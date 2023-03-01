@@ -1,7 +1,7 @@
 package main
 
 import (
-	"go_learn/github.com/2.seven_day/1.for_Gee/day3/gee"
+	"go_learn/github.com/2.seven_day/1.gee/day3/gee"
 	"net/http"
 )
 
