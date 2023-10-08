@@ -2,6 +2,9 @@ package main
 
 import "fmt"
 
+// 34: 找出有序数组中目标值的第一个和最后一个值
+// https://leetcode.cn/problems/find-first-and-last-position-of-element-in-sorted-array/description/
+
 func searchRange(nums []int, target int) []int {
 	leftBorder := getLeft(nums, target)
 	rightBorder := getRight(nums, target)
